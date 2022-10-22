@@ -1,0 +1,10 @@
+uri: "127.0.0.1:8080"
+s3:
+  aws_access_key_id: "jobboard"
+  aws_secret_access_key: "jobboard"
+  aws_region: "fake-region"
+  s3_endpoint: "http://localhost:9000"
+neo4j:
+  uri: "localhost:7687"
+  username: "neo4j"
+  password: "jobboard"

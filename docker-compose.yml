@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  db:
+    image: neo4j:4.4
+    container_name: nlpf-db
+    environment:
+      NEO4J_AUTH: neo4j/jobboard
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - nlpf_db_data:/data
+
+  s3:
+    image: quay.io/minio/minio:latest
+    container_name: nlpf-s3
+    environment:
+      - MINIO_ROOT_USER=jobboard
+      - MINIO_ROOT_PASSWORD=jobboard
+    volumes:
+      - nlpf_s3_data:/data
+    ports:
+      - 9000:9000
+      - 9090:9090
+    command: server /data --console-address ":9090"
+
+  s3_init:
+    image: quay.io/minio/mc:latest
+    container_name: nlpf-s3-init-buckets
+    depends_on:
+      - s3
+    entrypoint: [ "" ]
+    command:
+      - sh
+      - -c
+      - |
+        sleep 2
+        mc alias set myminio http://s3:9000 jobboard jobboard
+
+        mc mb myminio/first-bucket --ignore-existing
+        mc anonymous set download myminio/first-bucket
+
+volumes:
+  nlpf_db_data:
+  nlpf_s3_data:
