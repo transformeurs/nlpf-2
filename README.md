@@ -20,7 +20,9 @@ NB: the server will be listening to `127.0.0.1:8080` by default.
 
 ## Resources
 
-- Axum documentation: https://docs.rs/axum/0.5.17/axum/index.html
+- Axum
+  - Official doc: https://docs.rs/axum/0.5.17/axum/index.html
+  - Official examples: https://github.com/tokio-rs/axum/tree/0.5.x/examples
 - Neo4j
   - General doc: https://neo4j.com/docs/getting-started/current/
   - Query cheat sheet: https://neo4j.com/docs/cypher-refcard/current/
