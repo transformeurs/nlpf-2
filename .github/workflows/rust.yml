@@ -35,8 +35,6 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    env:
-      SQLX_OFFLINE: true
     steps:
       - name: Checkout source
         uses: actions/checkout@v2
