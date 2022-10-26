@@ -2,6 +2,7 @@ mod config;
 mod greet;
 mod neo_test;
 mod s3_test;
+mod users;
 
 use std::sync::Arc;
 
@@ -39,6 +40,7 @@ async fn build_app(config: Settings) -> Router {
         .route("/greet/:name", get(greet_template))
         .route("/neotest", post(neo_create_user))
         .route("/tests3", get(test_s3))
+        .route("/signup", get(users::routes::get_signup_page))
         .layer(TraceLayer::new_for_http())
         .layer(Extension(shared_state))
 }
