@@ -1,14 +1,17 @@
-use neo4rs::{query, Graph, Node};
+use neo4rs::{query, Node};
 
 use super::models::Candidate;
+use crate::SharedState;
 
+/// Create a new candidate in the database and return it
 pub async fn create_candidate(
     candidate: Candidate,
-    graph: Graph,
+    state: SharedState,
 ) -> Result<Candidate, neo4rs::Error> {
     tracing::info!("Creating candidate: {}", &candidate.name);
 
-    let mut result = graph
+    let mut result = state
+        .graph
         .execute(
             query(
                 r#"
@@ -32,8 +35,9 @@ pub async fn create_candidate(
         )
         .await?;
 
+    // Check if created, and log the name
     while let Ok(Some(row)) = result.next().await {
-        let node: Node = row.get("u").unwrap();
+        let node: Node = row.get("c").unwrap();
         let name: String = node.get("name").unwrap();
         tracing::info!("Created candidate: {name}");
     }

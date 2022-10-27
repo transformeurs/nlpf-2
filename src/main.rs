@@ -40,7 +40,7 @@ async fn build_app(config: Settings) -> Router {
         .route("/greet/:name", get(greet_template))
         .route("/neotest", post(neo_create_user))
         .route("/tests3", get(test_s3))
-        .route("/signup", get(users::routes::get_signup_page))
+        .nest("/", users::get_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(shared_state))
 }
@@ -57,9 +57,10 @@ async fn main() {
     let config = config::get_config().expect("Failed to read configuration.");
     let uri = config.uri;
 
+    // Build the app
     let app = build_app(config).await;
 
-    // Run it
+    // Run the app
     tracing::info!("Listening on {}", uri);
     axum::Server::bind(&uri)
         .serve(app.into_make_service())

@@ -1,5 +1,8 @@
+use std::collections::HashMap;
+
+use bcrypt::DEFAULT_COST;
+
 pub struct Candidate {
-    pub id: u64,
     pub name: String,
     pub email: String,
     pub password: String,
@@ -9,17 +12,19 @@ pub struct Candidate {
 }
 
 impl Candidate {
-    pub fn new(
-        id: u64,
-        name: String,
-        email: String,
-        password: String,
-        age: i64,
-        photo_url: String,
-        description: String,
-    ) -> Self {
+    /// Create from a hash map (from a form)
+    pub fn from_hash_map(map: HashMap<String, String>) -> Self {
+        let name = map.get("username").unwrap().clone();
+        let email = map.get("email").unwrap().clone();
+        let password = map.get("password").unwrap().clone();
+        let age = map.get("age").unwrap().clone().parse::<i64>().unwrap();
+        let photo_url = map.get("photo_url").unwrap().clone();
+        let description = map.get("description").unwrap().clone();
+
+        // Hash the password
+        let password = bcrypt::hash(&password, DEFAULT_COST).unwrap();
+
         Candidate {
-            id,
             name,
             email,
             password,
