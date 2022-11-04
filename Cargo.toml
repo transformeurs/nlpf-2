@@ -12,7 +12,7 @@ repository = "https://github.com/transformeurs/nlpf-2"
 askama = { version = "0.11", git = "https://github.com/djc/askama.git", rev = "c441459a27eb7c0c476ce70833e05224ba6894fd" }
 askama_axum = { version = "0.1", git = "https://github.com/djc/askama.git", rev = "c441459a27eb7c0c476ce70833e05224ba6894fd" }
 # axum is a web framework for Rust
-axum = { version = "0.5", features = ["multipart"] }
+axum = { version = "0.5", features = ["multipart", "headers"] }
 # neo4rs is for using Neo4j with Rust
 neo4rs = "0.5.9"
 # tokio is an async runtime for Rust
@@ -31,3 +31,5 @@ serde = "1.0.146"
 serde_with = "2.0.1"
 # bcrypt for password hashing
 bcrypt = "0.13.0"
+# async-session is for cookie session storage
+async-session = "3.0.0"

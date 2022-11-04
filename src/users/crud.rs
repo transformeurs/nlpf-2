@@ -44,3 +44,33 @@ pub async fn create_candidate(
 
     Ok(candidate)
 }
+
+/// Get a candidate by email
+pub async fn get_candidate_by_email(
+    email: String,
+    state: SharedState,
+) -> Result<Option<Candidate>, neo4rs::Error> {
+    tracing::info!("Getting candidate by email: {}", &email);
+
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (c:Candidate {email: $email})
+            RETURN c
+        "#,
+            )
+            .param("email", email),
+        )
+        .await?;
+
+    while let Ok(Some(row)) = result.next().await {
+        let node: Node = row.get("c").unwrap();
+        let name: String = node.get("name").unwrap();
+        tracing::info!("Found candidate: {name}");
+        return Ok(Some(Candidate::from_node(node)));
+    }
+
+    Ok(None)
+}

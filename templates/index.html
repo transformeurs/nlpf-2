@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Accueil{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<form action="/login" method="post" autocomplete="on" class="space-y-6">
+
+    <div class="grid items-center justify-center">
+        <div>
+            <input type="radio" name="user_role" value="candidate" id="candidateRole" checked="true">
+            <label for="candidateRole" class="ml-2 mr-5">
+                Candidat·e
+            </label>
+            <input type="radio" name="user_role" value="company" id="companyRole">
+            <label for="companyRole" class="ml-2">
+                Entreprise
+            </label>
+        </div>
+    </div>
+
+    <div class="relative mt-1 rounded-md shadow-sm">
+        <input type="email" id="email" name="email" autocomplete="email" placeholder="Votre adresse de courriel"
+            class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+            required>
+    </div>
+
+    <div class="relative mt-1 rounded-md shadow-sm">
+        <input type="password" name="password" id="password" autocomplete="current-password" placeholder="Mot de passe"
+            class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+            required>
+    </div>
+
+    <div>
+        <button type="submit"
+            class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+            Se connecter
+        </button>
+    </div>
+
+</form>
+{% endblock %}

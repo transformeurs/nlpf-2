@@ -1,11 +1,13 @@
 mod config;
 mod greet;
+mod homepage;
 mod neo_test;
 mod s3_test;
 mod users;
 
 use std::sync::Arc;
 
+use async_session::MemoryStore;
 use aws_sdk_s3::Client;
 use axum::{
     routing::{get, post},
@@ -35,14 +37,18 @@ async fn build_app(config: Settings) -> Router {
 
     let shared_state = Arc::new(State { graph, s3_client });
 
+    let store = MemoryStore::new();
+
     // Build our application with some routes
     Router::new()
         .route("/greet/:name", get(greet_template))
         .route("/neotest", post(neo_create_user))
         .route("/tests3", get(test_s3))
+        .route("/", get(homepage::get_home_page))
         .nest("/", users::get_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(shared_state))
+        .layer(Extension(store))
 }
 
 #[tokio::main]

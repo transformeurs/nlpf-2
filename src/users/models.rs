@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use bcrypt::DEFAULT_COST;
+use neo4rs::Node;
 
 pub struct Candidate {
     pub name: String,
@@ -23,6 +24,24 @@ impl Candidate {
 
         // Hash the password
         let password = bcrypt::hash(&password, DEFAULT_COST).unwrap();
+
+        Candidate {
+            name,
+            email,
+            password,
+            age,
+            photo_url,
+            description,
+        }
+    }
+
+    pub fn from_node(node: Node) -> Self {
+        let name: String = node.get("name").unwrap();
+        let email: String = node.get("email").unwrap();
+        let password: String = node.get("password").unwrap();
+        let age: i64 = node.get("age").unwrap();
+        let photo_url: String = node.get("photo_url").unwrap();
+        let description: String = node.get("description").unwrap();
 
         Candidate {
             name,
