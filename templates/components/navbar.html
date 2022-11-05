@@ -30,13 +30,22 @@
                         Lien
                     </div>
                 </a>
-
+                {% match auth_user %}
+                {% when Some with (val) %}
+                <a href="/logout">
+                    <div
+                        class="cursor-pointer rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Se déconnecter
+                    </div>
+                </a>
+                {% when None %}
                 <a href="/signup">
                     <div
                         class="cursor-pointer rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
                         S'inscrire
                     </div>
                 </a>
+                {% endmatch %}
             </div>
         </div>
     </div>

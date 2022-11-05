@@ -16,4 +16,5 @@ pub fn get_router() -> Router {
         )
         .route("/login", post(routes::post_login_page))
         .route("/infos", get(routes::get_infos_page))
+        .route("/logout", get(routes::get_logout_page))
 }

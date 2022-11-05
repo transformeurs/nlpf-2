@@ -1,5 +1,4 @@
 mod config;
-mod greet;
 mod homepage;
 mod neo_test;
 mod s3_test;
@@ -17,7 +16,7 @@ use neo4rs::*;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{config::Settings, greet::greet_template, neo_test::neo_create_user, s3_test::test_s3};
+use crate::{config::Settings, neo_test::neo_create_user, s3_test::test_s3};
 
 pub struct State {
     graph: Graph,
@@ -41,7 +40,6 @@ async fn build_app(config: Settings) -> Router {
 
     // Build our application with some routes
     Router::new()
-        .route("/greet/:name", get(greet_template))
         .route("/neotest", post(neo_create_user))
         .route("/tests3", get(test_s3))
         .route("/", get(homepage::get_home_page))

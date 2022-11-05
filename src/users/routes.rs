@@ -10,12 +10,12 @@ use axum::{
     },
     headers,
     http::{header, header::SET_COOKIE, HeaderMap, StatusCode},
-    response::{IntoResponse, Redirect},
+    response::{IntoResponse, Redirect, Response},
     Extension, Form, TypedHeader,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
-use super::crud::get_candidate_by_email;
+use super::{crud::get_candidate_by_email, models::AuthUser};
 use crate::{
     users::{crud::create_candidate, models::Candidate},
     SharedState,
@@ -23,16 +23,20 @@ use crate::{
 
 #[derive(Template)]
 #[template(path = "signup/index.html")]
-pub struct SignupTemplate {}
+pub struct SignupTemplate {
+    auth_user: Option<AuthUser>,
+}
 
 /// GET handler that simply return the signup form page.
 pub async fn get_signup_page() -> SignupTemplate {
-    SignupTemplate {}
+    SignupTemplate { auth_user: None }
 }
 
 #[derive(Template)]
 #[template(path = "signup/success.html")]
-pub struct SignupSuccessTemplate {}
+pub struct SignupSuccessTemplate {
+    auth_user: Option<AuthUser>,
+}
 
 /// POST handler for signup form submission
 /// First, we extract the multipart form data from the request and create a
@@ -101,7 +105,7 @@ pub async fn post_signup_page(
     }
 
     // Return success page!
-    Ok(SignupSuccessTemplate {})
+    Ok(SignupSuccessTemplate { auth_user: None })
 }
 
 #[derive(Deserialize, Debug)]
@@ -109,12 +113,6 @@ pub struct LoginForm {
     user_role: String,
     email: String,
     password: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct AuthUser {
-    user_role: String,
-    email: String,
 }
 
 static COOKIE_NAME: &str = "SESSION";
@@ -141,7 +139,6 @@ pub async fn post_login_page(
                 .map_err(|_err| (StatusCode::INTERNAL_SERVER_ERROR, "Error".to_string()))?
             {
                 // User successfully authenticated
-                // TODO create a session
                 let mut session = Session::new();
                 session
                     .insert(
@@ -173,13 +170,47 @@ pub async fn post_login_page(
     Err((StatusCode::UNAUTHORIZED, "Invalid credentials.".to_string()))
 }
 
+/// GET handler for logout (not POST because too difficult in HTML)
+pub async fn get_logout_page(
+    Extension(store): Extension<MemoryStore>,
+    TypedHeader(cookies): TypedHeader<headers::Cookie>,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    let cookie = cookies
+        .get(COOKIE_NAME)
+        .ok_or_else(|| (StatusCode::BAD_REQUEST, "No cookie found".to_string()))?;
+
+    let session = match store.load_session(cookie.to_string()).await.unwrap() {
+        Some(s) => s,
+        // No session active, just redirect
+        None => return Ok(Redirect::to("/")),
+    };
+
+    store.destroy_session(session).await.map_err(|err| {
+        tracing::error!("Error clearing session: {:?}", err);
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Error clearing session".to_string(),
+        )
+    })?;
+
+    Ok(Redirect::to("/"))
+}
+
+pub struct AuthRedirect;
+
+impl IntoResponse for AuthRedirect {
+    fn into_response(self) -> Response {
+        Redirect::to("/").into_response()
+    }
+}
+
 #[async_trait]
 impl<B> FromRequest<B> for AuthUser
 where
     B: Send,
 {
     // If anything goes wrong or no session is found, redirect to the auth page
-    type Rejection = StatusCode;
+    type Rejection = AuthRedirect;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
         let Extension(store) = Extension::<MemoryStore>::from_request(req)
@@ -190,22 +221,20 @@ where
             .await
             .map_err(|e| match *e.name() {
                 header::COOKIE => match e.reason() {
-                    TypedHeaderRejectionReason::Missing => StatusCode::UNAUTHORIZED,
+                    TypedHeaderRejectionReason::Missing => AuthRedirect,
                     _ => panic!("unexpected error getting Cookie header(s): {}", e),
                 },
                 _ => panic!("unexpected error getting cookies: {}", e),
             })?;
-        let session_cookie = cookies.get(COOKIE_NAME).ok_or(StatusCode::UNAUTHORIZED)?;
+        let session_cookie = cookies.get(COOKIE_NAME).ok_or(AuthRedirect)?;
 
         let session = store
             .load_session(session_cookie.to_string())
             .await
             .unwrap()
-            .ok_or(StatusCode::UNAUTHORIZED)?;
+            .ok_or(AuthRedirect)?;
 
-        let user = session
-            .get::<AuthUser>("user")
-            .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
+        let user = session.get::<AuthUser>("user").ok_or(AuthRedirect)?;
 
         Ok(user)
     }
@@ -214,30 +243,12 @@ where
 #[derive(Template)]
 #[template(path = "candidate_infos.html")]
 pub struct InfosTemplate {
-    candidate: Candidate,
+    auth_user: Option<AuthUser>,
 }
 
 /// GET handler for showing infos
-pub async fn get_infos_page(
-    Extension(state): Extension<SharedState>,
-    user: AuthUser,
-) -> Result<impl IntoResponse, (StatusCode, String)> {
-    if user.user_role == "candidate" {
-        let candidate = get_candidate_by_email(user.email, state)
-            .await
-            .map_err(|err| {
-                tracing::error!("Error getting candidate: {:?}", err);
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "Error getting candidate".to_string(),
-                )
-            })?
-            .ok_or((StatusCode::NOT_FOUND, "Candidate not found".to_string()))?;
-
-        Ok(InfosTemplate { candidate })
-    } else if user.user_role == "company" {
-        return Err((StatusCode::NOT_IMPLEMENTED, "Invalid role.".to_string()));
-    } else {
-        return Err((StatusCode::BAD_REQUEST, "Invalid role.".to_string()));
-    }
+pub async fn get_infos_page(user: AuthUser) -> Result<impl IntoResponse, (StatusCode, String)> {
+    Ok(InfosTemplate {
+        auth_user: Some(user),
+    })
 }

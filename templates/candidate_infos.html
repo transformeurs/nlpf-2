@@ -7,6 +7,11 @@
 
 {% block content %}
 <h1 class="text-3xl font-bold m-5">
-    Hello {{ candidate.name }}. You are logged in.
+    {% match auth_user %}
+    {% when Some with (val) %}
+    Found {{ val.email }}. You're logged in.
+    {% when None %}
+    No candidate found. You're not logged in.
+    {% endmatch %}
 </h1>
 {% endblock %}

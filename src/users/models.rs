@@ -2,6 +2,13 @@ use std::collections::HashMap;
 
 use bcrypt::DEFAULT_COST;
 use neo4rs::Node;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AuthUser {
+    pub user_role: String,
+    pub email: String,
+}
 
 pub struct Candidate {
     pub name: String,
