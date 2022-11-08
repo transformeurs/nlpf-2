@@ -33,3 +33,4 @@ serde_with = "2.0.1"
 bcrypt = "0.13.0"
 # async-session is for cookie session storage
 async-session = "3.0.0"
+uuid = { version = "1.2.1", features = ["v4", "fast-rng"] }

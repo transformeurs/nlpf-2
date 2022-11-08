@@ -18,6 +18,7 @@ use serde::Deserialize;
 use super::{crud::get_candidate_by_email, models::AuthUser};
 use crate::{
     users::{crud::create_candidate, models::Candidate},
+    utils::s3::upload_bytes_to_s3,
     SharedState,
 };
 
@@ -63,9 +64,20 @@ pub async fn post_signup_page(
         if let Some(name) = field.name() {
             // Handling the file upload to generate an URL from S3
             if name == "fileinput" {
-                // TODO
+                let content_type = field.content_type().unwrap().to_string();
+                let key = field.file_name().unwrap().to_string();
+                let bytes = field.bytes().await.unwrap();
+                let uri = upload_bytes_to_s3(
+                    bytes,
+                    content_type,
+                    "candidate-images".to_string(),
+                    key,
+                    state.clone(),
+                )
+                .await
+                .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
+
                 let name = String::from("photo_url");
-                let uri = String::from("https://www.google.com");
                 form_fields.insert(name, uri);
             }
             // Other fields
