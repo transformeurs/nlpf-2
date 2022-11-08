@@ -38,8 +38,8 @@ services:
         sleep 2
         mc alias set myminio http://s3:9000 jobboard jobboard
 
-        mc mb myminio/candidate-images --ignore-existing
-        mc anonymous set download myminio/candidate-images
+        mc mb myminio/profile-pictures --ignore-existing
+        mc anonymous set download myminio/profile-pictures
 
 volumes:
   nlpf_db_data:

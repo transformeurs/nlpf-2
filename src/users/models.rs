@@ -59,6 +59,50 @@ impl Candidate {
             description,
         }
     }
+}
 
-    // TODO methods for password comparison
+pub struct Company {
+    pub name: String,
+    pub email: String,
+    pub password: String,
+    pub description: String,
+    pub photo_url: String,
+}
+
+impl Company {
+    /// Create from a hash map (from a form)
+    pub fn from_hash_map(map: HashMap<String, String>) -> Self {
+        let name = map.get("username").unwrap().clone();
+        let email = map.get("email").unwrap().clone();
+        let password = map.get("password").unwrap().clone();
+        let photo_url = map.get("photo_url").unwrap().clone();
+        let description = map.get("description").unwrap().clone();
+
+        // Hash the password
+        let password = bcrypt::hash(&password, DEFAULT_COST).unwrap();
+
+        Company {
+            name,
+            email,
+            password,
+            photo_url,
+            description,
+        }
+    }
+
+    pub fn from_node(node: Node) -> Self {
+        let name: String = node.get("name").unwrap();
+        let email: String = node.get("email").unwrap();
+        let password: String = node.get("password").unwrap();
+        let photo_url: String = node.get("photo_url").unwrap();
+        let description: String = node.get("description").unwrap();
+
+        Company {
+            name,
+            email,
+            password,
+            photo_url,
+            description,
+        }
+    }
 }

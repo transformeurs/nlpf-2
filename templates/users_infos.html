@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Infos Candidat{% endblock %}
+{% block title %}Infos Utilisateur{% endblock %}
 
 {% block head %}
 {% endblock %}
@@ -11,7 +11,7 @@
     {% when Some with (val) %}
     Found {{ val.email }}. You're logged in.
     {% when None %}
-    No candidate found. You're not logged in.
+    No user found. You're not logged in.
     {% endmatch %}
 </h1>
 {% endblock %}

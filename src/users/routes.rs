@@ -15,7 +15,10 @@ use axum::{
 };
 use serde::Deserialize;
 
-use super::{crud::get_candidate_by_email, models::AuthUser};
+use super::{
+    crud::{create_company, get_candidate_by_email, get_company_by_email},
+    models::{AuthUser, Company},
+};
 use crate::{
     users::{crud::create_candidate, models::Candidate},
     utils::s3::upload_bytes_to_s3,
@@ -70,7 +73,7 @@ pub async fn post_signup_page(
                 let uri = upload_bytes_to_s3(
                     bytes,
                     content_type,
-                    "candidate-images".to_string(),
+                    "profile-pictures".to_string(),
                     key,
                     state.clone(),
                 )
@@ -101,11 +104,14 @@ pub async fn post_signup_page(
                 )
             })?;
         } else if role == "company" {
-            // TODO
-            return Err((
-                StatusCode::NOT_IMPLEMENTED,
-                "Company signup not implemented".to_string(),
-            ));
+            let company = Company::from_hash_map(form_fields);
+            create_company(company, state).await.map_err(|err| {
+                tracing::error!("Error creating company: {:?}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Error creating company".to_string(),
+                )
+            })?;
         } else {
             return Err((StatusCode::BAD_REQUEST, "Invalid role.".to_string()));
         }
@@ -129,6 +135,40 @@ pub struct LoginForm {
 
 static COOKIE_NAME: &str = "SESSION";
 
+async fn validate_login(
+    email: String,
+    password: String,
+    hashed_password: String,
+    user_role: String,
+    store: MemoryStore,
+) -> Result<impl IntoResponse, (StatusCode, String)> {
+    if bcrypt::verify(password, &hashed_password)
+        .map_err(|_err| (StatusCode::INTERNAL_SERVER_ERROR, "Error".to_string()))?
+    {
+        // User successfully authenticated
+        let mut session = Session::new();
+        session
+            .insert("user", AuthUser { user_role, email })
+            .unwrap();
+
+        let cookie = store.store_session(session).await.unwrap().unwrap();
+
+        let cookie = format!("{}={}; Secure; HttpOnly", COOKIE_NAME, cookie);
+
+        // Set cookie
+        let mut headers = HeaderMap::new();
+        headers.insert(SET_COOKIE, cookie.parse().unwrap());
+
+        return Ok((headers, Redirect::to("/infos")));
+    } else {
+        // User not authenticated
+        return Err((
+            StatusCode::UNAUTHORIZED,
+            "Invalid email or password".to_string(),
+        ));
+    }
+}
+
 /// POST handler for login
 pub async fn post_login_page(
     Form(input): Form<LoginForm>,
@@ -147,39 +187,43 @@ pub async fn post_login_page(
                     )
                 })?
         {
-            if bcrypt::verify(input.password, &candidate.password)
-                .map_err(|_err| (StatusCode::INTERNAL_SERVER_ERROR, "Error".to_string()))?
-            {
-                // User successfully authenticated
-                let mut session = Session::new();
-                session
-                    .insert(
-                        "user",
-                        AuthUser {
-                            user_role: input.user_role,
-                            email: candidate.email,
-                        },
-                    )
-                    .unwrap();
-
-                let cookie = store.store_session(session).await.unwrap().unwrap();
-
-                let cookie = format!("{}={}; Secure; HttpOnly", COOKIE_NAME, cookie);
-
-                // Set cookie
-                let mut headers = HeaderMap::new();
-                headers.insert(SET_COOKIE, cookie.parse().unwrap());
-
-                return Ok((headers, Redirect::to("/infos")));
-            }
+            return validate_login(
+                candidate.email,
+                input.password,
+                candidate.password,
+                input.user_role,
+                store,
+            )
+            .await;
         }
     } else if input.user_role == "company" {
-        return Err((StatusCode::NOT_IMPLEMENTED, "Invalid role.".to_string()));
+        if let Some(company) = get_company_by_email(input.email, state)
+            .await
+            .map_err(|err| {
+                tracing::error!("Error getting candidate: {:?}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "Error getting company".to_string(),
+                )
+            })?
+        {
+            return validate_login(
+                company.email,
+                input.password,
+                company.password,
+                input.user_role,
+                store,
+            )
+            .await;
+        }
     } else {
         return Err((StatusCode::BAD_REQUEST, "Invalid role.".to_string()));
     }
 
-    Err((StatusCode::UNAUTHORIZED, "Invalid credentials.".to_string()))
+    Err((
+        StatusCode::UNAUTHORIZED,
+        "Invalid email or password".to_string(),
+    ))
 }
 
 /// GET handler for logout (not POST because too difficult in HTML)
@@ -253,7 +297,7 @@ where
 }
 
 #[derive(Template)]
-#[template(path = "candidate_infos.html")]
+#[template(path = "users_infos.html")]
 pub struct InfosTemplate {
     auth_user: Option<AuthUser>,
 }
