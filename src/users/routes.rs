@@ -78,7 +78,7 @@ pub async fn post_signup_page(
                     state.clone(),
                 )
                 .await
-                .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()))?;
+                .map_err(|err| (StatusCode::INTERNAL_SERVER_ERROR, err))?;
 
                 let name = String::from("photo_url");
                 form_fields.insert(name, uri);
@@ -159,13 +159,13 @@ async fn validate_login(
         let mut headers = HeaderMap::new();
         headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-        return Ok((headers, Redirect::to("/infos")));
+        Ok((headers, Redirect::to("/infos")))
     } else {
         // User not authenticated
-        return Err((
+        Err((
             StatusCode::UNAUTHORIZED,
             "Invalid email or password".to_string(),
-        ));
+        ))
     }
 }
 

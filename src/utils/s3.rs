@@ -11,7 +11,7 @@ pub async fn upload_bytes_to_s3(
     key: String,
     state: SharedState,
 ) -> Result<String, String> {
-    let key = format!("{}-{}", Uuid::new_v4().to_string(), key);
+    let key = format!("{}-{}", Uuid::new_v4(), key);
 
     // Put the object
     state
