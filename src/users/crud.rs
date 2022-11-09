@@ -65,7 +65,7 @@ pub async fn get_candidate_by_email(
         )
         .await?;
 
-    while let Ok(Some(row)) = result.next().await {
+    if let Ok(Some(row)) = result.next().await {
         let node: Node = row.get("c").unwrap();
         let name: String = node.get("name").unwrap();
         tracing::info!("Found candidate: {name}");
@@ -135,7 +135,7 @@ pub async fn get_company_by_email(
         )
         .await?;
 
-    while let Ok(Some(row)) = result.next().await {
+    if let Ok(Some(row)) = result.next().await {
         let node: Node = row.get("c").unwrap();
         let name: String = node.get("name").unwrap();
         tracing::info!("Found company: {name}");
