@@ -23,7 +23,6 @@
 
             <!-- Navigation -->
             <div class="hidden items-baseline space-x-4 lg:flex">
-
                 <a href="#">
                     <div
                         class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
@@ -32,6 +31,14 @@
                 </a>
                 {% match auth_user %}
                 {% when Some with (val) %}
+                {% if val.user_role == "company" %}
+                <a href="/questionnaires">
+                    <div
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Questionnaires
+                    </div>
+                </a>
+                {% endif %}
                 <a href="/logout">
                     <div
                         class="cursor-pointer rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">

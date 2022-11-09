@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Infos Utilisateur{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+    <h1 class="text-3xl font-bold m-5 text-white">
+        Questionnaires
+    </h1>
+    <button class="border border-gray-300  bg-indigo-700 hover:bg-indigo-500 rounded px-4 py-2 text-white absolute right-6 top-0">
+        <a href="/questionnaires/create">Créer un questionnaire</a>
+    </button>
+</div>
+
+<div class="space-y-2">
+    <div class="w-full shadow-lg bg-white rounded-md px-4 py-2">
+        Mon super Questionnaire
+    </div>
+    <div class="w-full shadow-lg bg-white rounded-md px-4 py-2">
+        Mon super Questionnaire
+    </div>
+</div>
+
+
+{% endblock %}

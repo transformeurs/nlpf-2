@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}Infos Utilisateur{% endblock %}
+
+{% block head %}
+<script>
+    function addAnswer(questionIndex) {
+        var questions = document.getElementsByName("question");
+        console.log(questions);
+        var question = questions[questionIndex];
+        
+        var input = document.createElement("input");
+        input.setAttribute("type", "text");
+        input.setAttribute("id", "answer");
+        input.setAttribute("name", "answer");
+        input.setAttribute("placeholder", "Answer");
+        input.setAttribute("class", "block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500");
+        question.appendChild(input);
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="relative">
+  <h1 class="text-3xl font-bold m-5 text-white">Créer un questionnaire</h1>
+</div>
+
+<!-- Form to create a questionnaire -->
+<div class="flex justify-center">
+  <div class="w-full rounded-lg bg-white shadow lg:w-1/2">
+    <div class="px-4 py-8 sm:px-10">
+      <form
+        action="/questionnaires"
+        method="post"
+        autocomplete="on"
+        class="space-y-6"
+      >
+        <div class="relative mt-1 rounded-md shadow-sm">
+          <input
+            type="text"
+            id="name"
+            name="name"
+            placeholder="Nom du questionnaire"
+            class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div name="question">
+            <div class="relative mt-1 rounded-md shadow-sm">
+            <input
+                type="text"
+                id="question"
+                name="question"
+                placeholder="Question"
+                class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+                required
+            />
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm space-y-1">
+            <input
+                type="text"
+                id="answer-1"
+                name="answer-1"
+                placeholder="Option 1"
+                class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+                required
+            />
+            <input
+                type="text"
+                id="answer-2"
+                name="answer-2"
+                placeholder="Option 2"
+                class="hidden block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+                required
+            />
+            <input
+                type="text"
+                id="answer-3"
+                name="answer-3"
+                placeholder="Option 3"
+                class="hidden block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+                required
+            />
+            <input
+                type="text"
+                id="answer-4"
+                name="answer-4"
+                placeholder="Option 4"
+                class="hidden block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+                required
+            />
+            </div>
+        </div>
+
+        <div>
+          <div class="flex justify-end space-x-1">
+            <button
+                type="button"
+              class="mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500 px-4 py-2 text-sm"
+                onclick="addAnswer(0)"
+              >
+              Ajouter une réponse
+            </button>
+            <button
+              class="mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 px-4 py-2 text-sm"
+            >
+              Ajouter une question
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm"
+          >
+            Créer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
