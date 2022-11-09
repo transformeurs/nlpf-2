@@ -31,6 +31,7 @@ serde = "1.0.146"
 serde_with = "2.0.1"
 # bcrypt for password hashing
 bcrypt = "0.13.0"
-# async-session is for cookie session storage
+# async-session is for cookie session storage, we use Redis as storage
 async-session = "3.0.0"
+async-redis-session = "0.2.2"
 uuid = { version = "1.2.1", features = ["v4", "fast-rng"] }

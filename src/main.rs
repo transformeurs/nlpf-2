@@ -5,7 +5,7 @@ mod utils;
 
 use std::sync::Arc;
 
-use async_session::MemoryStore;
+use async_redis_session::RedisSessionStore;
 use aws_sdk_s3::Client;
 use axum::{routing::get, Extension, Router};
 use neo4rs::*;
@@ -32,7 +32,7 @@ async fn build_app(config: Settings) -> Router {
 
     let shared_state = Arc::new(State { graph, s3_client });
 
-    let store = MemoryStore::new();
+    let store = RedisSessionStore::new("redis://127.0.0.1/").expect("Failed to connect to Redis.");
 
     // Build our application with some routes
     Router::new()

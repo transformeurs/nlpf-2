@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use askama::Template;
-use async_session::{MemoryStore, Session, SessionStore};
+use async_redis_session::RedisSessionStore;
+use async_session::{Session, SessionStore};
 use axum::{
     async_trait,
     extract::{
@@ -140,7 +141,7 @@ async fn validate_login(
     password: String,
     hashed_password: String,
     user_role: String,
-    store: MemoryStore,
+    store: RedisSessionStore,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     if bcrypt::verify(password, &hashed_password)
         .map_err(|_err| (StatusCode::INTERNAL_SERVER_ERROR, "Error".to_string()))?
@@ -173,7 +174,7 @@ async fn validate_login(
 pub async fn post_login_page(
     Form(input): Form<LoginForm>,
     Extension(state): Extension<SharedState>,
-    Extension(store): Extension<MemoryStore>,
+    Extension(store): Extension<RedisSessionStore>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     if input.user_role == "candidate" {
         if let Some(candidate) =
@@ -228,7 +229,7 @@ pub async fn post_login_page(
 
 /// GET handler for logout (not POST because too difficult in HTML)
 pub async fn get_logout_page(
-    Extension(store): Extension<MemoryStore>,
+    Extension(store): Extension<RedisSessionStore>,
     TypedHeader(cookies): TypedHeader<headers::Cookie>,
 ) -> Result<impl IntoResponse, (StatusCode, String)> {
     let cookie = cookies
@@ -269,9 +270,9 @@ where
     type Rejection = AuthRedirect;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let Extension(store) = Extension::<MemoryStore>::from_request(req)
+        let Extension(store) = Extension::<RedisSessionStore>::from_request(req)
             .await
-            .expect("`MemoryStore` extension is missing");
+            .expect("`RedisSessionStore` extension is missing");
 
         let cookies = TypedHeader::<headers::Cookie>::from_request(req)
             .await

@@ -12,6 +12,12 @@ services:
     volumes:
       - nlpf_db_data:/data
 
+  redis:
+    image: redis:7
+    container_name: nlpf-redis
+    ports:
+      - 6379:6379
+
   s3:
     image: quay.io/minio/minio:latest
     container_name: nlpf-s3
