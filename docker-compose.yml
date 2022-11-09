@@ -12,6 +12,12 @@ services:
     volumes:
       - nlpf_db_data:/data
 
+  redis:
+    image: redis:7
+    container_name: nlpf-redis
+    ports:
+      - 6379:6379
+
   s3:
     image: quay.io/minio/minio:latest
     container_name: nlpf-s3
@@ -38,8 +44,8 @@ services:
         sleep 2
         mc alias set myminio http://s3:9000 jobboard jobboard
 
-        mc mb myminio/first-bucket --ignore-existing
-        mc anonymous set download myminio/first-bucket
+        mc mb myminio/profile-pictures --ignore-existing
+        mc anonymous set download myminio/profile-pictures
 
 volumes:
   nlpf_db_data:

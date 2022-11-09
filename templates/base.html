@@ -1,18 +1,36 @@
 <!DOCTYPE html>
-<html className="h-full bg-gray-200">
+<html class="h-full bg-gray-200">
 
 <head>
-    <title>JobBoard</title>
+    <title>{% block title %}{% endblock %} - JobBoard</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css?family=Montserrat:100,200,300,400,500,600,700,800,900"
         rel="stylesheet" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    {% block head %}{% endblock %}
 </head>
 
-<body className="h-full">
-    {% block content %}{% endblock %}
+<body class="h-full">
+    <div class="min-h-full">
+        {% include "components/navbar.html" %}
+
+        <main class="-mt-24 pb-8">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+
+        <footer>
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+                <div class="border-t border-gray-200 py-8 text-center text-sm text-gray-500 sm:text-left">
+                    <span class="block sm:inline">&copy; 2022 JobBoard</span>
+                    <span class="block sm:inline">Tous droits réservés.</span>
+                </div>
+            </div>
+        </footer>
+    </div>
 </body>
 
 </html>

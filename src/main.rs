@@ -1,20 +1,18 @@
 mod config;
-mod greet;
-mod neo_test;
-mod s3_test;
+mod homepage;
+mod users;
+mod utils;
 
 use std::sync::Arc;
 
+use async_redis_session::RedisSessionStore;
 use aws_sdk_s3::Client;
-use axum::{
-    routing::{get, post},
-    Extension, Router,
-};
+use axum::{routing::get, Extension, Router};
 use neo4rs::*;
 use tower_http::trace::TraceLayer;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-use crate::{config::Settings, greet::greet_template, neo_test::neo_create_user, s3_test::test_s3};
+use crate::config::Settings;
 
 pub struct State {
     graph: Graph,
@@ -34,13 +32,15 @@ async fn build_app(config: Settings) -> Router {
 
     let shared_state = Arc::new(State { graph, s3_client });
 
+    let store = RedisSessionStore::new("redis://127.0.0.1/").expect("Failed to connect to Redis.");
+
     // Build our application with some routes
     Router::new()
-        .route("/greet/:name", get(greet_template))
-        .route("/neotest", post(neo_create_user))
-        .route("/tests3", get(test_s3))
+        .route("/", get(homepage::get_home_page))
+        .nest("/", users::get_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(shared_state))
+        .layer(Extension(store))
 }
 
 #[tokio::main]
@@ -55,9 +55,10 @@ async fn main() {
     let config = config::get_config().expect("Failed to read configuration.");
     let uri = config.uri;
 
+    // Build the app
     let app = build_app(config).await;
 
-    // Run it
+    // Run the app
     tracing::info!("Listening on {}", uri);
     axum::Server::bind(&uri)
         .serve(app.into_make_service())
