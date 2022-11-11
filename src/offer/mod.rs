@@ -1,5 +1,5 @@
 use axum::{
-    routing::{get},
+    routing::{get, post},
     Router,
 };
 
@@ -16,7 +16,7 @@ pub fn get_router() -> Router {
         )
         .route(
             "/create_offer",
-            get(routes::create_offer),
+            post(routes::create_offer),
         )
         .route(
             "/view_offer",
