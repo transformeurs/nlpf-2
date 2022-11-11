@@ -3,19 +3,50 @@
 
 {% block head %}
 <script>
-    function addAnswer(questionIndex) {
-        var questions = document.getElementsByName("question");
-        console.log(questions);
-        var question = questions[questionIndex];
-        
-        var input = document.createElement("input");
-        input.setAttribute("type", "text");
-        input.setAttribute("id", "answer");
-        input.setAttribute("name", "answer");
-        input.setAttribute("placeholder", "Answer");
-        input.setAttribute("class", "block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500");
-        question.appendChild(input);
-    }
+  function addQuestion() {
+    var formElm = document.getElementById("questions");
+    var questionDiv = document.createElement("div");
+    var questionId = formElm.childElementCount
+    questionDiv.id = "question-" + questionId;
+    questionDiv.className = "space-y-2";
+    formElm.appendChild(questionDiv);
+
+    var questionInputDiv = document.createElement("div");
+    questionInputDiv.className = "flex space-x-2";
+    questionDiv.appendChild(questionInputDiv);
+
+    // Question input
+    var questionInput = document.createElement("input");
+    questionInput.type = "text";
+    questionInput.id = "question-" + questionId;
+    questionInput.name = "question-" + questionId;
+    questionInput.placeholder = "Question";
+    questionInput.className =
+      "block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500";
+    questionInput.required = true;
+    questionInputDiv.appendChild(questionInput);
+
+    let answerIndex = 0;
+
+    // Add option button
+    var addOptionButton = document.createElement("button");
+    addOptionButton.type = "button";
+    addOptionButton.className =
+      "w-64 inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500";
+    addOptionButton.innerHTML = "Ajouter une option";
+    addOptionButton.onclick = () => {
+      var answerInput = document.createElement("input");
+      answerInput.setAttribute("type", "text");
+      answerInput.setAttribute("id", "answer-" + questionId + "-" + answerIndex);
+      answerInput.setAttribute("name", "answer-" + questionId + "-" + answerIndex);
+      answerInput.setAttribute("placeholder", "Option");
+      answerInput.setAttribute("class", "block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500");
+      answerInput.required = true;
+      questionDiv.appendChild(answerInput);
+      answerIndex++;
+    };
+    questionInputDiv.appendChild(addOptionButton);
+  }
 </script>
 {% endblock %}
 
@@ -29,10 +60,12 @@
   <div class="w-full rounded-lg bg-white shadow lg:w-1/2">
     <div class="px-4 py-8 sm:px-10">
       <form
+        name="add-questionnaire"
         action="/questionnaires"
         method="post"
+        enctype="multipart/form-data"
         autocomplete="on"
-        class="space-y-6"
+        class="space-y-12"
       >
         <div class="relative mt-1 rounded-md shadow-sm">
           <input
@@ -45,66 +78,15 @@
           />
         </div>
 
-        <div name="question">
-            <div class="relative mt-1 rounded-md shadow-sm">
-            <input
-                type="text"
-                id="question"
-                name="question"
-                placeholder="Question"
-                class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
-                required
-            />
-            </div>
-
-            <div class="relative mt-1 rounded-md shadow-sm space-y-1">
-            <input
-                type="text"
-                id="answer-1"
-                name="answer-1"
-                placeholder="Option 1"
-                class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
-                required
-            />
-            <input
-                type="text"
-                id="answer-2"
-                name="answer-2"
-                placeholder="Option 2"
-                class="hidden block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
-                required
-            />
-            <input
-                type="text"
-                id="answer-3"
-                name="answer-3"
-                placeholder="Option 3"
-                class="hidden block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
-                required
-            />
-            <input
-                type="text"
-                id="answer-4"
-                name="answer-4"
-                placeholder="Option 4"
-                class="hidden block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
-                required
-            />
-            </div>
-        </div>
+        <div id="questions" class="space-y-4"></div>
 
         <div>
           <div class="flex justify-end space-x-1">
             <button
-                type="button"
-              class="mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-purple-600 text-white hover:bg-purple-700 focus:ring-purple-500 px-4 py-2 text-sm"
-                onclick="addAnswer(0)"
-              >
-              Ajouter une réponse
-            </button>
-            <button
+            type="button"
               class="mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 px-4 py-2 text-sm"
-            >
+              onclick="addQuestion()"
+              >
               Ajouter une question
             </button>
           </div>
