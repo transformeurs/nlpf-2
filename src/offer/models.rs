@@ -3,22 +3,23 @@ use std::collections::HashMap;
 use async_session::chrono::{self, NaiveDate};
 use neo4rs::Node;
 
-// Maybe include the company in the offer?
 pub struct Offer {
-    title: String,
-    description: String,
-    created_at: NaiveDate,
-    skills: Vec<String>,
-    location: String,
-    salary: i64,
-    job_duration: String,
-    job_start: String,
+    pub title: String,
+    pub uuid: uuid::Uuid,
+    pub description: String,
+    pub created_at: NaiveDate,
+    pub skills: Vec<String>,
+    pub location: String,
+    pub salary: i64,
+    pub job_duration: String,
+    pub job_start: String,
 }
 
 impl Offer {
     /// Create from a hash map (from a form)
-    pub fn from_hash_map(map: HashMap<String, String>, skills: Vec<String>) -> Self {
+    pub fn from_hash_map(map: HashMap<String, String>, skills: Vec<String>, id: uuid::Uuid) -> Self {
         let title = map.get("title").unwrap().clone();
+        let uuid = id;
         let description = map.get("description").unwrap().clone();
         let created_at = chrono::Utc::now().date_naive();
         let skills = skills;
@@ -29,6 +30,7 @@ impl Offer {
 
         Offer {
             title,
+            uuid,
             description,
             created_at,
             skills,
@@ -39,23 +41,27 @@ impl Offer {
         }
     }
 
-    // Didn't understand thw purpose of this function
+     pub fn from_node(node: Node) -> Self {
+        let title: String = node.get("title").unwrap();
+        let uuid: uuid::Uuid = uuid::Uuid::parse_str(&(String::as_str(&node.get("uuid").unwrap()))).unwrap();
+        let description: String = node.get("description").unwrap();
+        let created_at: NaiveDate = node.get("created_at").unwrap();
+        let skills: Vec<String> = node.get("skills").unwrap();
+        let location: String = node.get("location").unwrap();
+        let salary: i64 = node.get("salary").unwrap();
+        let job_duration: String = node.get("job_duration").unwrap();
+        let job_start: String = node.get("job_start").unwrap();
 
-    // pub fn from_node(node: Node) -> Self {
-    //     let name: String = node.get("name").unwrap();
-    //     let email: String = node.get("email").unwrap();
-    //     let password: String = node.get("password").unwrap();
-    //     let age: i64 = node.get("age").unwrap();
-    //     let photo_url: String = node.get("photo_url").unwrap();
-    //     let description: String = node.get("description").unwrap();
-
-    //     Offer {
-    //         name,
-    //         email,
-    //         password,
-    //         age,
-    //         photo_url,
-    //         description,
-    //     }
-    // }
+        Offer {
+            title, 
+            uuid,
+            description,
+            created_at,
+            skills,
+            location,
+            salary,
+            job_duration,
+            job_start,
+        }
+    }
 }
