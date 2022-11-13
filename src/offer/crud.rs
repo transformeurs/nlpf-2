@@ -2,14 +2,12 @@ use neo4rs::{query, Node};
 
 use super::models::Offer;
 
-use crate::users::models::Company;
-
 use crate::SharedState; // TODO : don't rly understand the purpose of this import
 
 /// Create a new offer made by a company and put it in neo4j
 pub async fn create_offer(
     offer: Offer,
-    company: Company,
+    company_email: String,
     state: SharedState,
 ) -> Result<Offer, neo4rs::Error> {
     tracing::info!("Creating offer: {}", &offer.title);
@@ -22,7 +20,7 @@ pub async fn create_offer(
             MATCH (c:Company {email: $email})
             CREATE (o:Offer {
                 title : $title,
-                uid : $uid,
+                uuid : $uuid,
                 description : $description,
                 created_at : $created_at,
                 skills : $skills,
@@ -30,13 +28,13 @@ pub async fn create_offer(
                 salary : $salary,
                 job_duration : $job_duration,
                 job_start : $job_start
-            }),
-            (o)-[:POSTED]->(c) 
+            })
+            CREATE (c)-[:POSTED]->(o)
             RETURN o
         "#,
             )
             .param("title", offer.title.clone())
-            .param("uuid", offer.uuid.clone().to_string())
+            .param("uuid", offer.uuid.to_string())
             .param("description", offer.description.clone())
             .param("created_at", offer.created_at.clone())
             .param("skills", offer.skills.clone())
@@ -44,13 +42,13 @@ pub async fn create_offer(
             .param("salary", offer.salary.clone())
             .param("job_duration", offer.job_duration.clone())
             .param("job_start", offer.job_start.clone())
-            .param("email", company.email.clone()),
+            .param("email", company_email.clone()),
         )
         .await?;
 
     // Check if created, and log the name
     while let Ok(Some(row)) = result.next().await {
-        let node: Node = row.get("c").unwrap();
+        let node: Node = row.get("o").unwrap();
         let title: String = node.get("title").unwrap();
         tracing::info!("Created offer: {title}");
     }
@@ -64,14 +62,12 @@ pub async fn offers(state: SharedState) -> Result<Option<Offer>, neo4rs::Error> 
 
     let mut result = state
         .graph
-        .execute(
-            query(
-                r#"
+        .execute(query(
+            r#"
             MATCH (c:Offer)
             RETURN c
         "#,
-            ),
-        )
+        ))
         .await?;
 
     if let Ok(Some(row)) = result.next().await {

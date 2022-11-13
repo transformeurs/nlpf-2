@@ -2,14 +2,18 @@ use std::collections::HashMap;
 
 use askama::Template;
 
-use async_session::log::kv::Error;
 use axum::{
-    extract::{ContentLengthLimit, Multipart, Path},
+    extract::{Multipart, Path},
     http::StatusCode,
+    Extension,
 };
+use uuid::Uuid;
 
-use super::crud::{create_offer, offer, offer_by_company, offers};
-use crate::users::models::AuthUser;
+use super::{
+    crud::{create_offer, offer, offer_by_company, offers},
+    models::Offer,
+};
+use crate::{users::models::AuthUser, SharedState};
 
 #[derive(Template)]
 #[template(path = "offers/offers.html")]
@@ -68,30 +72,48 @@ pub async fn get_create_offer(user: AuthUser) -> CreateOfferTemplate {
     }
 }
 
-#[derive(Template)]
+#[derive(Template, Debug)]
 #[template(path = "offers/post_create_offer.html")]
 pub struct CreateOfferSuccessTemplate {
     auth_user: Option<AuthUser>,
 }
 
 pub async fn post_create_offer(
-    ContentLengthLimit(mut multipart): ContentLengthLimit<
-        Multipart,
-        {
-            10 * 1024 * 1024 /* 10 MB */
-        },
-    >,
+    mut multipart: Multipart,
     user: AuthUser,
+    Extension(state): Extension<SharedState>, // Ca sert a quoi ?
 ) -> Result<CreateOfferSuccessTemplate, (StatusCode, String)> {
-    let mut form_fields: HashMap<String, String> = HashMap::new();
-    while let Some(field) = multipart
-        .next_field()
-        .await
-        // Return HTTP 400 Bad Request in case of any error
-        .map_err(|err| (StatusCode::BAD_REQUEST, err.to_string()))?
-    {
-        print!("field: {}", field.name().unwrap());
+    if user.user_role != "company" {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            "Invalid role : you must be a company".to_string(),
+        ));
     }
+
+    let mut form_fields = HashMap::new();
+    while let Some(mut field) = multipart.next_field().await.unwrap() {
+        let name = field.name().unwrap().to_string();
+        let content = field.text().await.unwrap().clone();
+        form_fields.insert(name, content);
+    }
+
+    let uuid = Uuid::new_v4();
+    let skills_str: Vec<&str> = form_fields.get("skills").unwrap().split(",").collect();
+    // convert Vec<&str> to Vec<String>
+    let skills: Vec<String> = skills_str.iter().map(|&s| s.to_string()).collect();
+
+    print!("offer: {:?}", form_fields);
+    let offer = Offer::from_hash_map(form_fields, skills, uuid);
+    create_offer(offer, user.email.clone(), state)
+        .await
+        .map_err(|err| {
+            tracing::error!("Error creating offer: {:?}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error creating offer".to_string(),
+            )
+        })?;
+
     Ok(CreateOfferSuccessTemplate {
         auth_user: Some(user),
     })

@@ -17,7 +17,11 @@ pub struct Offer {
 
 impl Offer {
     /// Create from a hash map (from a form)
-    pub fn from_hash_map(map: HashMap<String, String>, skills: Vec<String>, id: uuid::Uuid) -> Self {
+    pub fn from_hash_map(
+        map: HashMap<String, String>,
+        skills: Vec<String>,
+        id: uuid::Uuid,
+    ) -> Self {
         let title = map.get("title").unwrap().clone();
         let uuid = id;
         let description = map.get("description").unwrap().clone();
@@ -41,9 +45,10 @@ impl Offer {
         }
     }
 
-     pub fn from_node(node: Node) -> Self {
+    pub fn from_node(node: Node) -> Self {
         let title: String = node.get("title").unwrap();
-        let uuid: uuid::Uuid = uuid::Uuid::parse_str(&(String::as_str(&node.get("uuid").unwrap()))).unwrap();
+        let uuid: uuid::Uuid =
+            uuid::Uuid::parse_str(&(String::as_str(&node.get("uuid").unwrap()))).unwrap();
         let description: String = node.get("description").unwrap();
         let created_at: NaiveDate = node.get("created_at").unwrap();
         let skills: Vec<String> = node.get("skills").unwrap();
@@ -53,7 +58,7 @@ impl Offer {
         let job_start: String = node.get("job_start").unwrap();
 
         Offer {
-            title, 
+            title,
             uuid,
             description,
             created_at,
