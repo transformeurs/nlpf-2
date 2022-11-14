@@ -66,10 +66,16 @@ pub struct CreateOfferTemplate {
     auth_user: Option<AuthUser>,
 }
 
-pub async fn get_create_offer(user: AuthUser) -> CreateOfferTemplate {
-    CreateOfferTemplate {
-        auth_user: Some(user),
+pub async fn get_create_offer(user: AuthUser) -> Result<CreateOfferTemplate, (StatusCode, String)> {
+    if user.user_role != "company" {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            "Invalid role : you must be a company to create an offer".to_string(),
+        ));
     }
+    Ok(CreateOfferTemplate {
+        auth_user: Some(user),
+    })
 }
 
 #[derive(Template, Debug)]
@@ -81,15 +87,14 @@ pub struct CreateOfferSuccessTemplate {
 pub async fn post_create_offer(
     mut multipart: Multipart,
     user: AuthUser,
-    Extension(state): Extension<SharedState>, // Ca sert a quoi ?
+    Extension(state): Extension<SharedState>,
 ) -> Result<CreateOfferSuccessTemplate, (StatusCode, String)> {
     if user.user_role != "company" {
         return Err((
             StatusCode::BAD_REQUEST,
-            "Invalid role : you must be a company".to_string(),
+            "Invalid role : you must be a company to create an offer".to_string(),
         ));
     }
-
     let mut form_fields = HashMap::new();
     while let Some(mut field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();

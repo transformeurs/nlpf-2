@@ -2,9 +2,9 @@ use neo4rs::{query, Node};
 
 use super::models::Offer;
 
-use crate::SharedState; // TODO : don't rly understand the purpose of this import
+use crate::SharedState;
 
-/// Create a new offer made by a company and put it in neo4j
+// Create a new offer made by a company and put it in neo4j
 pub async fn create_offer(
     offer: Offer,
     company_email: String,
