@@ -1,30 +1,28 @@
-use neo4rs::{query, Node, Relation};
+use neo4rs::{query, Relation};
 
 use super::models::Candidacy;
 
-use crate::{users::models::Candidate, SharedState};
+use crate::SharedState;
 
-/// Create a new candidate in the database and return it
+/// Create a new candidacy in the database and put it in neo4j
 pub async fn create_candidacy(
-    candidate: Candidate,
-    //offer: Offer,
+    //candidate: Candidate,
+    candidate_email: String,
     candidacy: Candidacy,
     state: SharedState,
 ) -> Result<Candidacy, neo4rs::Error> {
-    tracing::info!("Creating candidacy:");
+    tracing::info!("Creating candidacy: {}", &candidate_email);
 
     let mut result = state
         .graph
         .execute(
             query(
                 r#"
-                CREATE (o:Offer {id: 1})
                 MATCH (c:Candidate)
                 WITH c
                 MATCH (o:Offer)
-                WHERE c.name = $candidate.name AND o.id = $offer.id
-                CREATE (c)-[:CANDIDATE_TO {
-                    created_at: $created_at,
+                WHERE c.email = $email AND o.title = "Stage"
+                CREATE (c)-[r:CANDIDATE_TO {
                     status: $status,
                     cover_letter_url: $cover_letter_url,
                     resume_url: $resume_url,
@@ -33,6 +31,7 @@ pub async fn create_candidacy(
                 RETURN r
         "#,
             )
+            .param("email", candidate_email.clone())
             .param("status", candidacy.status.clone())
             .param("cover_letter_url", candidacy.cover_letter_url.clone())
             .param("resume_url", candidacy.resume_url.clone())
@@ -43,8 +42,8 @@ pub async fn create_candidacy(
     // Check if created, and log the name
     while let Ok(Some(row)) = result.next().await {
         let relation: Relation = row.get("r").unwrap();
-        let offer_id: String = relation.get("offer_id").unwrap();
-        tracing::info!("Created candidacy: {offer_id}");
+        let field: String = relation.get("custom_field").unwrap();
+        tracing::info!("Created candidacy: {field}");
     }
 
     Ok(candidacy)

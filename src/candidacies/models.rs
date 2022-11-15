@@ -22,7 +22,7 @@ impl Candidacy {
         let status = map.get("status").unwrap().clone();
         let cover_letter_url = map.get("cover_letter_url").unwrap().clone();
         let resume_url = map.get("resume_url").unwrap().clone();
-        let custom_field = map.get("custome_field").unwrap().clone();
+        let custom_field = map.get("custom_field").unwrap().clone();
 
         Candidacy {
             status,
