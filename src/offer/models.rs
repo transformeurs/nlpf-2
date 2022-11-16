@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use async_session::chrono::{self, NaiveDate};
 use neo4rs::Node;
 
+#[derive(Debug)]
 pub struct Offer {
     pub title: String,
     pub uuid: uuid::Uuid,
@@ -45,7 +46,7 @@ impl Offer {
         }
     }
 
-    pub fn from_node(node: Node) -> Self {
+    pub fn from_node(node: Node) -> Offer {
         let title: String = node.get("title").unwrap();
         let uuid: uuid::Uuid =
             uuid::Uuid::parse_str(&(String::as_str(&node.get("uuid").unwrap()))).unwrap();

@@ -57,55 +57,67 @@ pub async fn create_offer(
 }
 
 // Return all the offers of the site
-pub async fn offers(state: SharedState) -> Result<Option<Offer>, neo4rs::Error> {
+pub async fn offers(state: SharedState) -> Result<Option<Vec<Offer>>, neo4rs::Error> {
     tracing::info!("Getting all offers");
 
     let mut result = state
         .graph
         .execute(query(
             r#"
-            MATCH (c:Offer)
-            RETURN c
-        "#,
+        MATCH (o:Offer)
+        RETURN o
+    "#,
         ))
         .await?;
 
-    if let Ok(Some(row)) = result.next().await {
-        let node: Node = row.get("c").unwrap();
+    let mut offers: Vec<Offer> = Vec::new();
+
+    while let Ok(Some(row)) = result.next().await {
+        let node: Node = row.get("o").unwrap();
         let title: String = node.get("title").unwrap();
         tracing::info!("Found offer: {title}");
-        return Ok(Some(Offer::from_node(node)));
+        offers.push(Offer::from_node(node));
+    }
+
+    if (offers.len() != 0) {
+        return Ok(Some(offers));
     }
 
     Ok(None)
 }
 
 // Return the list of offer made by a company
-// TODO : put all the offers linked to a company
 pub async fn offer_by_company(
-    name: String,
+    email: String,
     state: SharedState,
-) -> Result<Option<Offer>, neo4rs::Error> {
-    tracing::info!("Getting offer by company name: {}", name);
+) -> Result<Option<Vec<Offer>>, neo4rs::Error> {
+    tracing::info!("Getting offer by company email: {}", email);
 
     let mut result = state
         .graph
         .execute(
             query(
                 r#"
-            MATCH (c:Offer {uuid: $uuid})
-            RETURN c
+            MATCH (c:Company {email:$email})
+            MATCH (c)-[POSTED]-(o:Offer) 
+            RETURN o
         "#,
             )
-            .param("name", name.to_string()),
+            .param("email", email.to_string()),
         )
         .await?;
+
+    let mut offers: Vec<Offer> = Vec::new();
 
     if let Ok(Some(row)) = result.next().await {
         let node: Node = row.get("c").unwrap();
         let title: String = node.get("title").unwrap();
         tracing::info!("Found offer: {title}");
-        return Ok(Some(Offer::from_node(node)));
+        offers.push(Offer::from_node(node));
+    }
+
+    if (offers.len() != 0) {
+        return Ok(Some(offers));
     }
 
     Ok(None)
@@ -120,8 +132,8 @@ pub async fn offer(id: uuid::Uuid, state: SharedState) -> Result<Option<Offer>, 
         .execute(
             query(
                 r#"
-            MATCH (c:Offer {uuid: $uuid})
-            RETURN c
+            MATCH (o:Offer {uuid: $uuid})
+            RETURN o
         "#,
             )
             .param("uuid", id.to_string()),

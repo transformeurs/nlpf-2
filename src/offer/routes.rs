@@ -1,6 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, iter::Enumerate};
 
 use askama::Template;
+
+use async_session::chrono::{self, NaiveDate};
 
 use axum::{
     extract::{Multipart, Path},
@@ -19,23 +21,44 @@ use crate::{users::models::AuthUser, SharedState};
 #[template(path = "offers/offers.html")]
 pub struct OfferTemplate {
     auth_user: Option<AuthUser>,
-    list_offers: Vec<String>,
+    title: String,
+    uuid: uuid::Uuid,
+    description: String,
+    created_at: String,
+    skills: Vec<String>,
+    location: String,
+    salary: i64,
+    job_duration: String,
+    job_start: String,
 }
 
-pub async fn get_offer(user: AuthUser) -> OfferTemplate {
-    let mut offers = Vec::new();
+pub async fn get_offer(user: AuthUser, Extension(state): Extension<SharedState>) -> OfferTemplate {
+    let mut l_offers: Option<Vec<Offer>> = Some(Vec::new());
     if user.user_role == "candidate" {
-        offers.push("cand".to_string());
+        l_offers = offers(state).await.unwrap();
     } else if user.user_role == "company" {
-        offers.push("comp".to_string());
+        l_offers = offer_by_company(user.email.clone(), state).await.unwrap();
     }
+    let unwrap_l_offer = l_offers.unwrap();
+
+    /*for x in unwrap_l_offer.iter() {
+        println!("Title Offer: {}\n", x.title);
+    }*/
 
     OfferTemplate {
         auth_user: Some(user),
-        list_offers: offers,
+        title: unwrap_l_offer[0].title.clone(),
+        uuid: unwrap_l_offer[0].uuid.clone(),
+        description: unwrap_l_offer[0].description.clone(),
+        created_at: unwrap_l_offer[0].created_at.clone().to_string(),
+        skills: unwrap_l_offer[0].skills.clone(),
+        location: unwrap_l_offer[0].location.clone(),
+        salary: unwrap_l_offer[0].salary.clone(),
+        job_duration: unwrap_l_offer[0].job_duration.clone(),
+        job_start: unwrap_l_offer[0].job_start.clone(),
     }
 }
-
+/*
 #[derive(Template)]
 #[template(path = "offers/offers.html")]
 pub struct OfferCompanyTemplate {
@@ -59,7 +82,7 @@ pub async fn get_offer_company(
         list_offers: offers,
     }
 }
-
+*/
 #[derive(Template)]
 #[template(path = "offers/create_offer.html")]
 pub struct CreateOfferTemplate {
@@ -107,7 +130,6 @@ pub async fn post_create_offer(
     // convert Vec<&str> to Vec<String>
     let skills: Vec<String> = skills_str.iter().map(|&s| s.to_string()).collect();
 
-    print!("offer: {:?}", form_fields);
     let offer = Offer::from_hash_map(form_fields, skills, uuid);
     create_offer(offer, user.email.clone(), state)
         .await
@@ -123,7 +145,7 @@ pub async fn post_create_offer(
         auth_user: Some(user),
     })
 }
-
+/*
 #[derive(Template)]
 #[template(path = "offers/view_offer.html")]
 pub struct ViewOfferTemplate {
@@ -135,3 +157,5 @@ pub async fn get_view_offer(user: AuthUser) -> ViewOfferTemplate {
         auth_user: Some(user),
     }
 }
+
+*/
