@@ -56,6 +56,7 @@ pub async fn create_offer(
     Ok(offer)
 }
 
+// TODO : Gérer le cas ou il y a aucun noeud qui a etait fetch (ca fait un bug)
 // Return all the offers of the site
 pub async fn offers(state: SharedState) -> Result<Option<Vec<Offer>>, neo4rs::Error> {
     tracing::info!("Getting all offers");
@@ -79,7 +80,7 @@ pub async fn offers(state: SharedState) -> Result<Option<Vec<Offer>>, neo4rs::Er
         offers.push(Offer::from_node(node));
     }
 
-    if (offers.len() != 0) {
+    if offers.len() != 0 {
         return Ok(Some(offers));
     }
 
@@ -109,14 +110,14 @@ pub async fn offer_by_company(
 
     let mut offers: Vec<Offer> = Vec::new();
 
-    if let Ok(Some(row)) = result.next().await {
-        let node: Node = row.get("c").unwrap();
+    while let Ok(Some(row)) = result.next().await {
+        let node: Node = row.get("o").unwrap();
         let title: String = node.get("title").unwrap();
         tracing::info!("Found offer: {title}");
         offers.push(Offer::from_node(node));
     }
 
-    if (offers.len() != 0) {
+    if offers.len() != 0 {
         return Ok(Some(offers));
     }
 

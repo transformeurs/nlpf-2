@@ -1,8 +1,6 @@
-use std::{collections::HashMap, iter::Enumerate};
+use std::collections::HashMap;
 
 use askama::Template;
-
-use async_session::chrono::{self, NaiveDate};
 
 use axum::{
     extract::{Multipart, Path},
@@ -12,7 +10,7 @@ use axum::{
 use uuid::Uuid;
 
 use super::{
-    crud::{create_offer, offer, offer_by_company, offers},
+    crud::{create_offer, offer_by_company, offers},
     models::Offer,
 };
 use crate::{users::models::AuthUser, SharedState};
@@ -21,15 +19,7 @@ use crate::{users::models::AuthUser, SharedState};
 #[template(path = "offers/offers.html")]
 pub struct OfferTemplate {
     auth_user: Option<AuthUser>,
-    title: String,
-    uuid: uuid::Uuid,
-    description: String,
-    created_at: String,
-    skills: Vec<String>,
-    location: String,
-    salary: i64,
-    job_duration: String,
-    job_start: String,
+    offers: Option<Vec<Offer>>,
 }
 
 pub async fn get_offer(user: AuthUser, Extension(state): Extension<SharedState>) -> OfferTemplate {
@@ -39,50 +29,33 @@ pub async fn get_offer(user: AuthUser, Extension(state): Extension<SharedState>)
     } else if user.user_role == "company" {
         l_offers = offer_by_company(user.email.clone(), state).await.unwrap();
     }
-    let unwrap_l_offer = l_offers.unwrap();
-
-    /*for x in unwrap_l_offer.iter() {
-        println!("Title Offer: {}\n", x.title);
-    }*/
 
     OfferTemplate {
         auth_user: Some(user),
-        title: unwrap_l_offer[0].title.clone(),
-        uuid: unwrap_l_offer[0].uuid.clone(),
-        description: unwrap_l_offer[0].description.clone(),
-        created_at: unwrap_l_offer[0].created_at.clone().to_string(),
-        skills: unwrap_l_offer[0].skills.clone(),
-        location: unwrap_l_offer[0].location.clone(),
-        salary: unwrap_l_offer[0].salary.clone(),
-        job_duration: unwrap_l_offer[0].job_duration.clone(),
-        job_start: unwrap_l_offer[0].job_start.clone(),
+        offers: l_offers,
     }
 }
-/*
+
 #[derive(Template)]
 #[template(path = "offers/offers.html")]
 pub struct OfferCompanyTemplate {
     auth_user: Option<AuthUser>,
-    list_offers: Vec<String>,
+    offers: Option<Vec<Offer>>,
 }
 
 pub async fn get_offer_company(
-    Path(company_name): Path<String>,
+    Path(company_email): Path<String>,
     user: AuthUser,
+    Extension(state): Extension<SharedState>,
 ) -> OfferCompanyTemplate {
-    let mut offers = Vec::new();
-    if user.user_role == "candidate" {
-        offers.push("cand".to_string());
-    } else if user.user_role == "company" {
-        offers.push("comp".to_string());
-    }
-    print!("company_name: {}", company_name);
+    let l_offers = offer_by_company(company_email, state).await.unwrap();
+
     OfferCompanyTemplate {
         auth_user: Some(user),
-        list_offers: offers,
+        offers: l_offers,
     }
 }
-*/
+
 #[derive(Template)]
 #[template(path = "offers/create_offer.html")]
 pub struct CreateOfferTemplate {
@@ -119,7 +92,7 @@ pub async fn post_create_offer(
         ));
     }
     let mut form_fields = HashMap::new();
-    while let Some(mut field) = multipart.next_field().await.unwrap() {
+    while let Some(field) = multipart.next_field().await.unwrap() {
         let name = field.name().unwrap().to_string();
         let content = field.text().await.unwrap().clone();
         form_fields.insert(name, content);
