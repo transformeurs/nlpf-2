@@ -23,13 +23,6 @@
 
             <!-- Navigation -->
             <div class="hidden items-baseline space-x-4 lg:flex">
-
-                <a href="#">
-                    <div
-                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                        Lien
-                    </div>
-                </a>
                 {% match auth_user %}
                 {% when Some(user) %}
                     {% if user.user_role == "company" %}

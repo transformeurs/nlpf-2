@@ -36,7 +36,7 @@ pub async fn create_candidate(
         .await?;
 
     // Check if created, and log the name
-    while let Ok(Some(row)) = result.next().await {
+    if let Ok(Some(row)) = result.next().await {
         let node: Node = row.get("c").unwrap();
         let name: String = node.get("name").unwrap();
         tracing::info!("Created candidate: {name}");

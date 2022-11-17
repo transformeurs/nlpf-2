@@ -11,7 +11,7 @@ pub mod routes;
 pub fn get_router() -> Router {
     Router::new()
         .route("/offers", get(routes::get_offer))
-        .route("/offers/:company_name", get(routes::get_offer_company))
+        .route("/offers/:company_email", get(routes::get_offer_company))
         .route(
             "/create_offer",
             get(routes::get_create_offer).post(routes::post_create_offer),

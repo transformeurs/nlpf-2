@@ -56,7 +56,6 @@ pub async fn create_offer(
     Ok(offer)
 }
 
-// TODO : Gérer le cas ou il y a aucun noeud qui a etait fetch (ca fait un bug)
 // Return all the offers of the site
 pub async fn offers(state: SharedState) -> Result<Option<Vec<Offer>>, neo4rs::Error> {
     tracing::info!("Getting all offers");
