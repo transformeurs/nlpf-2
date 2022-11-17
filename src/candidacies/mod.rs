@@ -6,8 +6,10 @@ pub mod routes;
 
 /// Return a router for the user module.
 pub fn get_router() -> Router {
-    Router::new().route(
-        "/create_candidacy",
-        get(routes::get_create_candidacy).post(routes::post_create_candidacy),
-    )
+    Router::new()
+        .route(
+            "/create_candidacy",
+            get(routes::get_create_candidacy).post(routes::post_create_candidacy),
+        )
+        .route("/condidacies/:email", get(routes::get_candidacy_candidate))
 }

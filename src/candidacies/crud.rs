@@ -48,3 +48,32 @@ pub async fn create_candidacy(
 
     Ok(candidacy)
 }
+
+pub async fn candidacy_by_candidate(
+    email: String,
+    state: SharedState,
+) -> Result<Option<Candidacy>, neo4rs::Error> {
+    tracing::info!("Getting candidacy by candidate email: {}", email);
+
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (r:Candidacy {email: $email})
+            RETURN r
+        "#,
+            )
+            .param("email", email.to_string()),
+        )
+        .await?;
+
+    if let Ok(Some(row)) = result.next().await {
+        let relation: Relation = row.get("r").unwrap();
+        let email: String = relation.get("email").unwrap();
+        tracing::info!("Found candidacy for : {email}");
+        return Ok(Some(Candidacy::from_relation(relation)));
+    }
+
+    Ok(None)
+}

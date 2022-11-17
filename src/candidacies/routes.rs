@@ -111,3 +111,50 @@ pub async fn post_create_candidacy(
         auth_user: Some(user),
     })
 }
+
+#[derive(Template)]
+#[template(path = "candidacies/candidacies.html")]
+pub struct CandidacyTemplate {
+    auth_user: Option<AuthUser>,
+    list_candidacies: Vec<String>,
+}
+
+pub async fn get_offer(user: AuthUser) -> CandidacyTemplate {
+    let mut candidacies = Vec::new();
+    if user.user_role == "candidate" {
+        candidacies.push("cand".to_string());
+    } else if user.user_role == "company" {
+        candidacies.push("comp".to_string());
+    }
+
+    CandidacyTemplate {
+        auth_user: Some(user),
+        list_candidacies: candidacies,
+    }
+}
+
+#[derive(Template)]
+#[template(path = "candidacies/candidacies.html")]
+pub struct CandidacyCandidateTemplate {
+    auth_user: Option<AuthUser>,
+    list_candidacies: Vec<String>,
+}
+
+pub async fn get_candidacy_candidate(
+    Path(candidate_email): Path<String>,
+    user: AuthUser,
+) -> CandidacyCandidateTemplate {
+    let mut candidacies = Vec::new();
+    if user.user_role == "candidate" {
+        candidacies.push("cand".to_string());
+    } else if user.user_role == "company" {
+        candidacies.push("comp".to_string());
+    }
+    print!("candidate_email: {}", candidate_email);
+    //let candidacies = Candidacy::from_relation(candidate_email);
+
+    CandidacyCandidateTemplate {
+        auth_user: Some(user),
+        list_candidacies: candidacies,
+    }
+}

@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}candidatures{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold m-5 text-white">
+    Salut!
+</h1>
+<ul>
+  {% for candidacy in list_candidacies %}
+    {% include "candidacies/candidacy.html" %}
+  {% endfor %}
+    </ul>
+{% endblock %}
