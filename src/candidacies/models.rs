@@ -36,7 +36,7 @@ impl Candidacy {
         let status: String = relation.get("status").unwrap();
         let cover_letter_url: String = relation.get("cover_letter_url").unwrap();
         let resume_url: String = relation.get("resume_url").unwrap();
-        let custom_field: String = relation.get("custome_field").unwrap();
+        let custom_field: String = relation.get("custom_field").unwrap();
 
         Candidacy {
             status,

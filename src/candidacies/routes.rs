@@ -7,9 +7,9 @@ use axum::{
     http::StatusCode,
     Extension,
 };
-use uuid::Uuid;
+// use uuid::Uuid;
 
-use super::{crud::create_candidacy, models::Candidacy};
+use super::{crud::{create_candidacy, candidacy_by_candidate}, models::Candidacy};
 use crate::{users::models::AuthUser, utils::s3::upload_bytes_to_s3, SharedState};
 
 #[derive(Template)]
@@ -50,7 +50,7 @@ pub async fn post_create_candidacy(
         ));
     }
     let mut form_fields = HashMap::new();
-    while let Some(mut field) = multipart.next_field().await.unwrap() {
+    while let Some(field) = multipart.next_field().await.unwrap() {
         if let Some(name) = field.name() {
             // Handling the file upload to generate an URL from S3
             if name == "cover_letter_url" {
@@ -112,49 +112,47 @@ pub async fn post_create_candidacy(
     })
 }
 
+/*
 #[derive(Template)]
 #[template(path = "candidacies/candidacies.html")]
 pub struct CandidacyTemplate {
     auth_user: Option<AuthUser>,
     list_candidacies: Vec<String>,
 }
+*/
 
-pub async fn get_offer(user: AuthUser) -> CandidacyTemplate {
-    let mut candidacies = Vec::new();
+/*
+pub async fn get_candidacy(user: AuthUser, Extension(state): Extension<SharedState>) -> CandidacyTemplate {
+    let mut l_candidacies: Option<Vec<Candidacy>> = Some(Vec::new());
     if user.user_role == "candidate" {
-        candidacies.push("cand".to_string());
+        l_candidacies = candidacies(state).await.unwrap();
     } else if user.user_role == "company" {
-        candidacies.push("comp".to_string());
+        l_candidacies = candidacy_by_candidacies(user.email.clone(), state).await.unwrap();
     }
 
     CandidacyTemplate {
         auth_user: Some(user),
-        list_candidacies: candidacies,
+        offers: l_candidacies,
     }
 }
+*/
 
 #[derive(Template)]
 #[template(path = "candidacies/candidacies.html")]
 pub struct CandidacyCandidateTemplate {
     auth_user: Option<AuthUser>,
-    list_candidacies: Vec<String>,
+    candidacies: Option<Vec<Candidacy>>,
 }
 
 pub async fn get_candidacy_candidate(
     Path(candidate_email): Path<String>,
     user: AuthUser,
+    Extension(state): Extension<SharedState>,
 ) -> CandidacyCandidateTemplate {
-    let mut candidacies = Vec::new();
-    if user.user_role == "candidate" {
-        candidacies.push("cand".to_string());
-    } else if user.user_role == "company" {
-        candidacies.push("comp".to_string());
-    }
-    print!("candidate_email: {}", candidate_email);
-    //let candidacies = Candidacy::from_relation(candidate_email);
+    let list_candidacies = candidacy_by_candidate(candidate_email, state).await.unwrap();
 
     CandidacyCandidateTemplate {
         auth_user: Some(user),
-        list_candidacies: candidacies,
+        candidacies: list_candidacies,
     }
 }

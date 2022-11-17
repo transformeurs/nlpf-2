@@ -52,7 +52,7 @@ pub async fn create_candidacy(
 pub async fn candidacy_by_candidate(
     email: String,
     state: SharedState,
-) -> Result<Option<Candidacy>, neo4rs::Error> {
+) -> Result<Option<Vec<Candidacy>>, neo4rs::Error> {
     tracing::info!("Getting candidacy by candidate email: {}", email);
 
     let mut result = state
@@ -60,19 +60,25 @@ pub async fn candidacy_by_candidate(
         .execute(
             query(
                 r#"
-            MATCH (r:Candidacy {email: $email})
+            MATCH (c:Candidate {email: $email})-[r:CANDIDATE_TO]->(o:Offer)
             RETURN r
         "#,
             )
             .param("email", email.to_string()),
         )
         .await?;
+    
+    let mut candidacies : Vec<Candidacy> = Vec::new();
 
-    if let Ok(Some(row)) = result.next().await {
+    while let Ok(Some(row)) = result.next().await {
         let relation: Relation = row.get("r").unwrap();
-        let email: String = relation.get("email").unwrap();
-        tracing::info!("Found candidacy for : {email}");
-        return Ok(Some(Candidacy::from_relation(relation)));
+        let custom_field: String = relation.get("custom_field").unwrap();
+        tracing::info!("Found candidacy: {custom_field}");
+        candidacies.push(Candidacy::from_relation(relation));
+    }
+
+    if candidacies.len() != 0 {
+        return Ok(Some(candidacies));
     }
 
     Ok(None)
