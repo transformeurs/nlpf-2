@@ -9,7 +9,10 @@ use axum::{
 };
 // use uuid::Uuid;
 
-use super::{crud::{create_candidacy, candidacy_by_candidate}, models::Candidacy};
+use super::{
+    crud::{candidacy_by_candidate, create_candidacy},
+    models::Candidacy,
+};
 use crate::{users::models::AuthUser, utils::s3::upload_bytes_to_s3, SharedState};
 
 #[derive(Template)]
@@ -145,11 +148,12 @@ pub struct CandidacyCandidateTemplate {
 }
 
 pub async fn get_candidacy_candidate(
-    Path(candidate_email): Path<String>,
     user: AuthUser,
     Extension(state): Extension<SharedState>,
 ) -> CandidacyCandidateTemplate {
-    let list_candidacies = candidacy_by_candidate(candidate_email, state).await.unwrap();
+    let list_candidacies = candidacy_by_candidate(user.email.clone(), state)
+        .await
+        .unwrap();
 
     CandidacyCandidateTemplate {
         auth_user: Some(user),

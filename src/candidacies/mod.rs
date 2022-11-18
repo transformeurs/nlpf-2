@@ -11,5 +11,8 @@ pub fn get_router() -> Router {
             "/create_candidacy",
             get(routes::get_create_candidacy).post(routes::post_create_candidacy),
         )
-        .route("/candidacies/:email", get(routes::get_candidacy_candidate))
+        .route(
+            "/candidacies_by_candidate/",
+            get(routes::get_candidacy_candidate),
+        )
 }
