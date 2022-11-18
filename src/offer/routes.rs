@@ -10,7 +10,7 @@ use axum::{
 use uuid::Uuid;
 
 use super::{
-    crud::{create_offer, offer_by_company, offers},
+    crud::{create_offer, offer, offer_by_company, offers},
     models::Offer,
 };
 use crate::{users::models::AuthUser, SharedState};
@@ -118,17 +118,30 @@ pub async fn post_create_offer(
         auth_user: Some(user),
     })
 }
-/*
+
 #[derive(Template)]
 #[template(path = "offers/view_offer.html")]
 pub struct ViewOfferTemplate {
     auth_user: Option<AuthUser>,
+    offer: Option<Offer>,
 }
 
-pub async fn get_view_offer(user: AuthUser) -> ViewOfferTemplate {
+pub async fn get_view_offer(
+    Path(str_uuid): Path<String>,
+    user: AuthUser,
+    Extension(state): Extension<SharedState>,
+) -> ViewOfferTemplate {
+    let uuid = Uuid::try_parse(&str_uuid);
+    if uuid.is_err() {
+        return ViewOfferTemplate {
+            auth_user: Some(user),
+            offer: None,
+        };
+    }
+    let offer_res = offer(uuid.unwrap(), state).await.unwrap();
+
     ViewOfferTemplate {
         auth_user: Some(user),
+        offer: offer_res,
     }
 }
-
-*/

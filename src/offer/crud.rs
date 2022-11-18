@@ -124,8 +124,9 @@ pub async fn offer_by_company(
 }
 
 // Return a single offer in an other page
-pub async fn offer(id: uuid::Uuid, state: SharedState) -> Result<Option<Offer>, neo4rs::Error> {
-    tracing::info!("Getting offer by uuid: {}", id.to_string());
+pub async fn offer(uuid_str: uuid::Uuid, state: SharedState) -> Result<Option<Offer>, neo4rs::Error> {
+    let uuid = uuid_str.to_string();
+    tracing::info!("Getting offer by uuid: {}", uuid);
 
     let mut result = state
         .graph
@@ -136,12 +137,12 @@ pub async fn offer(id: uuid::Uuid, state: SharedState) -> Result<Option<Offer>, 
             RETURN o
         "#,
             )
-            .param("uuid", id.to_string()),
+            .param("uuid", uuid),
         )
         .await?;
 
     if let Ok(Some(row)) = result.next().await {
-        let node: Node = row.get("c").unwrap();
+        let node: Node = row.get("o").unwrap();
         let title: String = node.get("title").unwrap();
         tracing::info!("Found offer: {title}");
         return Ok(Some(Offer::from_node(node)));

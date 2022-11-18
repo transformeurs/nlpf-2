@@ -40,8 +40,8 @@
                     <p>{{ offer.job_start }}</p>
                 </div>
     
-                <button type="submit" action="/view_offer" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
-                            Voir l'offre
+                <button onclick="location.href='/view_offer/{{ offer.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+                    Voir l'offre
                 </button>
             </div>
         </div>

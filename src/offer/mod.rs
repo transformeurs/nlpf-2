@@ -1,7 +1,4 @@
-use axum::{
-    routing::{get},
-    Router,
-};
+use axum::{routing::get, Router};
 
 pub mod crud;
 pub mod models;
@@ -16,5 +13,5 @@ pub fn get_router() -> Router {
             "/create_offer",
             get(routes::get_create_offer).post(routes::post_create_offer),
         )
-    //.route("/view_offer/:uuid", get(routes::get_view_offer))
+        .route("/view_offer/:uuid", get(routes::get_view_offer))
 }
