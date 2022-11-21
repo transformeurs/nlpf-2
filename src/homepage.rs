@@ -1,4 +1,5 @@
 use askama::Template;
+use axum::response::{IntoResponse, Redirect, Response};
 
 use crate::users::models::AuthUser;
 
@@ -9,7 +10,10 @@ pub struct HomePageTemplate {
 }
 
 /// GET handler that simply return the home page.
-pub async fn get_home_page(user: Option<AuthUser>) -> HomePageTemplate {
-    // TODO: if connected return another template (offers)
-    HomePageTemplate { auth_user: user }
+pub async fn get_home_page(user: Option<AuthUser>) -> Response {
+    if user.is_some() {
+        return Redirect::to("/offers").into_response();
+    }
+
+    HomePageTemplate { auth_user: None }.into_response()
 }

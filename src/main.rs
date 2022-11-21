@@ -1,5 +1,6 @@
 mod config;
 mod homepage;
+mod offer;
 mod users;
 mod utils;
 
@@ -38,6 +39,7 @@ async fn build_app(config: Settings) -> Router {
     Router::new()
         .route("/", get(homepage::get_home_page))
         .nest("/", users::get_router())
+        .nest("/", offer::get_router())
         .layer(TraceLayer::new_for_http())
         .layer(Extension(shared_state))
         .layer(Extension(store))
