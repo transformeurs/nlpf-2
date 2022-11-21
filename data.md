@@ -43,11 +43,9 @@ CREATE (o:Offer {
 MATCH (c:Candidate)
 WITH c
 MATCH (o:Offer)
-WHERE c.name = "Tom Marquaille" AND o.title = "Stage"
+WHERE c.name = "nico" AND o.title = "Stage"
 CREATE (c)-[:CANDIDATE_TO {
-    candidate_id: 1,
-    offer_id: 1,
-    created_at: "2019-01-01",
+    uuid : "4b4b370d-368e-4936-99a2-c3ada7206c18",
     status: "pending",
     cover_letter_url: "toto",
     resume_url: "tata",

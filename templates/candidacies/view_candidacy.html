@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}View Candidacy{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
+    <div class="px-4 py-8 sm:px-10">
+        <div class="mt-6">
+            {% match candidacy %}
+            {% when Some with (val) %}
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.cover_letter_url }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.resume_url }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.custom_field }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.status }}</p>
+            </div>
+
+            {% when None %}
+            <p>
+                Candidacy not found
+            </p>
+            {% endmatch %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -7,10 +7,11 @@ use axum::{
     http::StatusCode,
     Extension,
 };
-// use uuid::Uuid;
+
+use uuid::Uuid;
 
 use super::{
-    crud::{candidacy_by_candidate, create_candidacy},
+    crud::{candidacy, candidacy_by_candidate, create_candidacy},
     models::Candidacy,
 };
 use crate::{users::models::AuthUser, utils::s3::upload_bytes_to_s3, SharedState};
@@ -98,8 +99,8 @@ pub async fn post_create_candidacy(
         }
     }
 
-    print!("candidacy: {:?}", form_fields);
-    let candidacy = Candidacy::from_hash_map(form_fields);
+    let uuid = Uuid::new_v4();
+    let candidacy = Candidacy::from_hash_map(form_fields, uuid);
     create_candidacy(user.email.clone(), candidacy, state)
         .await
         .map_err(|err| {
@@ -115,30 +116,31 @@ pub async fn post_create_candidacy(
     })
 }
 
-/*
 #[derive(Template)]
 #[template(path = "candidacies/candidacies.html")]
 pub struct CandidacyTemplate {
     auth_user: Option<AuthUser>,
-    list_candidacies: Vec<String>,
+    candidacies: Option<Vec<Candidacy>>,
 }
-*/
 
-/*
-pub async fn get_candidacy(user: AuthUser, Extension(state): Extension<SharedState>) -> CandidacyTemplate {
+pub async fn get_candidacy(
+    user: AuthUser,
+    Extension(state): Extension<SharedState>,
+) -> CandidacyTemplate {
     let mut l_candidacies: Option<Vec<Candidacy>> = Some(Vec::new());
-    if user.user_role == "candidate" {
-        l_candidacies = candidacies(state).await.unwrap();
-    } else if user.user_role == "company" {
-        l_candidacies = candidacy_by_candidacies(user.email.clone(), state).await.unwrap();
+    //if user.user_role == "candidate" {
+    //    l_candidacies = candidacies(state).await.unwrap();
+    if user.user_role == "company" {
+        l_candidacies = candidacy_by_candidate(user.email.clone(), state)
+            .await
+            .unwrap();
     }
 
     CandidacyTemplate {
         auth_user: Some(user),
-        offers: l_candidacies,
+        candidacies: l_candidacies,
     }
 }
-*/
 
 #[derive(Template)]
 #[template(path = "candidacies/candidacies.html")]
@@ -158,5 +160,33 @@ pub async fn get_candidacy_candidate(
     CandidacyCandidateTemplate {
         auth_user: Some(user),
         candidacies: list_candidacies,
+    }
+}
+
+#[derive(Template)]
+#[template(path = "candidacies/view_candidacy.html")]
+pub struct ViewCandidacyTemplate {
+    auth_user: Option<AuthUser>,
+    candidacy: Option<Candidacy>,
+}
+
+pub async fn get_view_candidacy(
+    Path(str_uuid): Path<String>,
+    user: AuthUser,
+    Extension(state): Extension<SharedState>,
+) -> ViewCandidacyTemplate {
+    println!("uuid = {}", str_uuid);
+    let uuid = Uuid::try_parse(&str_uuid);
+    if uuid.is_err() {
+        return ViewCandidacyTemplate {
+            auth_user: Some(user),
+            candidacy: None,
+        };
+    }
+    let candidacy_res = candidacy(uuid.unwrap(), state).await.unwrap();
+
+    ViewCandidacyTemplate {
+        auth_user: Some(user),
+        candidacy: candidacy_res,
     }
 }
