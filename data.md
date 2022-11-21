@@ -36,9 +36,23 @@ CREATE (o:Offer {
     job_duration : "1 year and 4 mounths",
     job_start : date("2023-10-04"),
 }) RETURN c
+
+CREATE (o)-[:POSTED]->(company)
 ```
 
-Link :
+
+## Create relationship between offer and candidate
+
 ```
-CREATE (o)-[:POSTED]->(company)
+MATCH (c:Candidate)
+WITH c
+MATCH (o:Offer)
+WHERE c.name = "nico" AND o.title = "Stage"
+CREATE (c)-[:CANDIDATE_TO {
+    uuid : "4b4b370d-368e-4936-99a2-c3ada7206c18",
+    status: "pending",
+    cover_letter_url: "toto",
+    resume_url: "tata",
+    custom_field: "titi"
+}]->(o)
 ```
