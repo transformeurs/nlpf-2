@@ -23,7 +23,7 @@ pub async fn create_candidacy(
                 MATCH (o:Offer)
                 WHERE c.email = $email AND o.title = "Stage"
                 CREATE (c)-[r:CANDIDATE_TO {
-                    uuid : &uuid,
+                    uuid : $uuid,
                     status: $status,
                     cover_letter_url: $cover_letter_url,
                     resume_url: $resume_url,
