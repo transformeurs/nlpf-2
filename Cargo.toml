@@ -14,6 +14,8 @@ askama_axum = { version = "0.1", git = "https://github.com/djc/askama.git", rev 
 # axum is a web framework for Rust
 axum = { version = "0.5", features = ["multipart", "headers"] }
 # neo4rs is for using Neo4j with Rust
+# We use this fork because the original one does not implement properly list types in Cypher
+# see PR https://github.com/yehohanan7/neo4rs/pull/11
 neo4rs = { version = "0.5.9", git = "https://github.com/Peikos/neo4rs.git", branch = "feature_vec" }
 # tokio is an async runtime for Rust
 tokio = { version = "1", features = ["full"] }
