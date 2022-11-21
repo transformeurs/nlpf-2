@@ -8,7 +8,11 @@ use axum::{
     Extension,
 };
 
-use crate::{users::models::AuthUser, SharedState};
+use crate::{
+    questionnaires::{crud::create_questionnaire, models::Questionnaire},
+    users::models::AuthUser,
+    SharedState,
+};
 
 // ***************************************
 // GET /questionnaires
@@ -39,10 +43,9 @@ pub struct SignupSuccessTemplate {
     auth_user: Option<AuthUser>,
 }
 
-/// POST handler for signup form submission
+/// POST handler for creating questionnaire
 /// First, we extract the multipart form data from the request and create a
-/// hash for each field. For the file input, upload the file to S3 and get the
-/// URL. Then, create a new candidate/company in the database.
+/// hash for each field. Then, create a new questionnaire in the database.
 pub async fn post_questionnaire_page(
     ContentLengthLimit(mut multipart): ContentLengthLimit<
         Multipart,
@@ -71,34 +74,17 @@ pub async fn post_questionnaire_page(
     println!("Form fields: {:?}", form_fields);
 
     // Create a new candidate or a new company by reading the userRole field
-    // if let Some(role) = form_fields.get("userRole") {
-    //     if role == "candidate" {
-    //         let candidate = Candidate::from_hash_map(form_fields);
-    //         create_candidate(candidate, state).await.map_err(|err| {
-    //             tracing::error!("Error creating candidate: {:?}", err);
-    //             (
-    //                 StatusCode::INTERNAL_SERVER_ERROR,
-    //                 "Error creating candidate".to_string(),
-    //             )
-    //         })?;
-    //     } else if role == "company" {
-    //         let company = Company::from_hash_map(form_fields);
-    //         create_company(company, state).await.map_err(|err| {
-    //             tracing::error!("Error creating company: {:?}", err);
-    //             (
-    //                 StatusCode::INTERNAL_SERVER_ERROR,
-    //                 "Error creating company".to_string(),
-    //             )
-    //         })?;
-    //     } else {
-    //         return Err((StatusCode::BAD_REQUEST, "Invalid role.".to_string()));
-    //     }
-    // }
-    // // If the "userRole" field was not in the form...
-    // else {
-    //     tracing::error!("No role found");
-    //     return Err((StatusCode::BAD_REQUEST, "No role found".to_string()));
-    // }
+    let questionnaire = Questionnaire::from_hash_map(form_fields);
+
+    create_questionnaire(questionnaire, state)
+        .await
+        .map_err(|err| {
+            tracing::error!("Error creating questionnaire: {:?}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error creating questionnaire".to_string(),
+            )
+        })?;
 
     // Return success page!
     Ok(SignupSuccessTemplate { auth_user: None })

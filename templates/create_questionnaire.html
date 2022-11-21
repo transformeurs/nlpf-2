@@ -35,6 +35,9 @@
       "w-64 inline-flex justify-center items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500";
     addOptionButton.innerHTML = "Ajouter une option";
     addOptionButton.onclick = () => {
+      var answerDiv = document.createElement("div");
+      answerDiv.className = "flex space-x-2 items-center";
+
       var answerInput = document.createElement("input");
       answerInput.setAttribute("type", "text");
       answerInput.setAttribute("id", "answer-" + questionId + "-" + answerIndex);
@@ -42,8 +45,17 @@
       answerInput.setAttribute("placeholder", "Option");
       answerInput.setAttribute("class", "block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500");
       answerInput.required = true;
-      questionDiv.appendChild(answerInput);
+      answerDiv.appendChild(answerInput);
+
+      var answerCheckbox = document.createElement("input");
+      answerCheckbox.setAttribute("type", "checkbox");
+      answerCheckbox.setAttribute("id", "validity-" + questionId + "-" + answerIndex);
+      answerCheckbox.setAttribute("name", "validity-" + questionId + "-" + answerIndex);
+      answerCheckbox.setAttribute("class", "ml-2");
+      answerDiv.appendChild(answerCheckbox);
+      
       answerIndex++;
+      questionDiv.appendChild(answerDiv);
     };
     questionInputDiv.appendChild(addOptionButton);
   }
