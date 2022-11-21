@@ -1,7 +1,6 @@
 use neo4rs::{query, Relation};
 
 use super::models::Candidacy;
-
 use crate::SharedState;
 
 /// Create a new candidacy in the database and put it in neo4j
@@ -79,7 +78,7 @@ pub async fn candidacy_by_candidate(
         candidacies.push(Candidacy::from_relation(relation));
     }
 
-    if candidacies.len() != 0 {
+    if !candidacies.is_empty() {
         return Ok(Some(candidacies));
     }
 

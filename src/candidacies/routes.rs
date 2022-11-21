@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 
 use askama::Template;
-
 use axum::{
     extract::{Multipart, Path},
     http::StatusCode,
     Extension,
 };
-
 use uuid::Uuid;
 
 use super::{

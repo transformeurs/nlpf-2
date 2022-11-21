@@ -37,7 +37,7 @@ impl Candidacy {
 
     pub fn from_relation(relation: Relation) -> Self {
         let uuid: uuid::Uuid =
-            uuid::Uuid::parse_str(&(String::as_str(&relation.get("uuid").unwrap()))).unwrap();
+            uuid::Uuid::parse_str(String::as_str(&relation.get("uuid").unwrap())).unwrap();
         let status: String = relation.get("status").unwrap();
         let cover_letter_url: String = relation.get("cover_letter_url").unwrap();
         let resume_url: String = relation.get("resume_url").unwrap();
