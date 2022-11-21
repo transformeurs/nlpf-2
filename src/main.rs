@@ -1,7 +1,7 @@
 mod config;
 mod homepage;
-mod users;
 mod offer;
+mod users;
 mod utils;
 
 use std::sync::Arc;

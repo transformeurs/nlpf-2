@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use askama::Template;
-
 use axum::{
     extract::{Multipart, Path},
     http::StatusCode,
@@ -99,7 +98,7 @@ pub async fn post_create_offer(
     }
 
     let uuid = Uuid::new_v4();
-    let skills_str: Vec<&str> = form_fields.get("skills").unwrap().split(",").collect();
+    let skills_str: Vec<&str> = form_fields.get("skills").unwrap().split(',').collect();
     // convert Vec<&str> to Vec<String>
     let skills: Vec<String> = skills_str.iter().map(|&s| s.to_string()).collect();
 

@@ -1,7 +1,7 @@
 use askama::Template;
-use axum::response::{IntoResponse, Response, Redirect};
+use axum::response::{IntoResponse, Redirect, Response};
 
-use crate::{users::models::AuthUser};
+use crate::users::models::AuthUser;
 
 #[derive(Template)]
 #[template(path = "index.html")]
@@ -16,5 +16,4 @@ pub async fn get_home_page(user: Option<AuthUser>) -> Response {
     }
 
     HomePageTemplate { auth_user: None }.into_response()
-
 }

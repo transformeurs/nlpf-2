@@ -49,7 +49,7 @@ impl Offer {
     pub fn from_node(node: Node) -> Offer {
         let title: String = node.get("title").unwrap();
         let uuid: uuid::Uuid =
-            uuid::Uuid::parse_str(&(String::as_str(&node.get("uuid").unwrap()))).unwrap();
+            uuid::Uuid::parse_str(String::as_str(&node.get("uuid").unwrap())).unwrap();
         let description: String = node.get("description").unwrap();
         let created_at: NaiveDate = node.get("created_at").unwrap();
         let skills: Vec<String> = node.get("skills").unwrap();

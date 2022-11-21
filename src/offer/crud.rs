@@ -1,7 +1,6 @@
 use neo4rs::{query, Node};
 
 use super::models::Offer;
-
 use crate::SharedState;
 
 // Create a new offer made by a company and put it in neo4j
@@ -36,10 +35,10 @@ pub async fn create_offer(
             .param("title", offer.title.clone())
             .param("uuid", offer.uuid.to_string())
             .param("description", offer.description.clone())
-            .param("created_at", offer.created_at.clone())
+            .param("created_at", offer.created_at)
             .param("skills", offer.skills.clone())
             .param("location", offer.location.clone())
-            .param("salary", offer.salary.clone())
+            .param("salary", offer.salary)
             .param("job_duration", offer.job_duration.clone())
             .param("job_start", offer.job_start.clone())
             .param("email", company_email.clone()),
@@ -79,7 +78,7 @@ pub async fn offers(state: SharedState) -> Result<Option<Vec<Offer>>, neo4rs::Er
         offers.push(Offer::from_node(node));
     }
 
-    if offers.len() != 0 {
+    if !offers.is_empty() {
         return Ok(Some(offers));
     }
 
@@ -116,7 +115,7 @@ pub async fn offer_by_company(
         offers.push(Offer::from_node(node));
     }
 
-    if offers.len() != 0 {
+    if !offers.is_empty() {
         return Ok(Some(offers));
     }
 
@@ -124,7 +123,10 @@ pub async fn offer_by_company(
 }
 
 // Return a single offer in an other page
-pub async fn offer(uuid_str: uuid::Uuid, state: SharedState) -> Result<Option<Offer>, neo4rs::Error> {
+pub async fn offer(
+    uuid_str: uuid::Uuid,
+    state: SharedState,
+) -> Result<Option<Offer>, neo4rs::Error> {
     let uuid = uuid_str.to_string();
     tracing::info!("Getting offer by uuid: {}", uuid);
 
