@@ -18,9 +18,11 @@ use crate::{users::models::AuthUser, utils::s3::upload_bytes_to_s3, SharedState}
 #[template(path = "candidacies/create_candidacy.html")]
 pub struct CreateCandidacyTemplate {
     auth_user: Option<AuthUser>,
+    uuid_offer: String,
 }
 
 pub async fn get_create_candidacy(
+    Path(str_uuid): Path<String>,
     user: AuthUser,
 ) -> Result<CreateCandidacyTemplate, (StatusCode, String)> {
     if user.user_role != "candidate" {
@@ -31,6 +33,7 @@ pub async fn get_create_candidacy(
     }
     Ok(CreateCandidacyTemplate {
         auth_user: Some(user),
+        uuid_offer: str_uuid,
     })
 }
 
@@ -41,10 +44,13 @@ pub struct CreateCandidacySuccessTemplate {
 }
 
 pub async fn post_create_candidacy(
+    Path(str_uuid): Path<String>,
     mut multipart: Multipart,
     user: AuthUser,
     Extension(state): Extension<SharedState>,
 ) -> Result<CreateCandidacySuccessTemplate, (StatusCode, String)> {
+    let uuid_offer = Uuid::try_parse(&str_uuid);
+
     if user.user_role != "candidate" {
         return Err((
             StatusCode::BAD_REQUEST,
@@ -98,8 +104,9 @@ pub async fn post_create_candidacy(
     }
 
     let uuid = Uuid::new_v4();
+    println!("uuid_offer = {}", str_uuid);
     let candidacy = Candidacy::from_hash_map(form_fields, uuid);
-    create_candidacy(user.email.clone(), candidacy, state)
+    create_candidacy(uuid_offer.unwrap(), user.email.clone(), candidacy, state)
         .await
         .map_err(|err| {
             tracing::error!("Error creating candidacy: {:?}", err);

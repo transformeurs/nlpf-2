@@ -9,7 +9,7 @@ pub fn get_router() -> Router {
     Router::new()
         .route("/candidacies", get(routes::get_candidacy))
         .route(
-            "/create_candidacy",
+            "/create_candidacy/:uuid",
             get(routes::get_create_candidacy).post(routes::post_create_candidacy),
         )
         .route(
