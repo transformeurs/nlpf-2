@@ -118,3 +118,105 @@ pub async fn candidacy(
 
     Ok(None)
 }
+
+pub async fn candidacy_by_offer(
+    company_email: String,
+    uuid_str: uuid::Uuid,
+    state: SharedState,
+) -> Result<Option<Vec<Candidacy>>, neo4rs::Error> {
+    tracing::info!("Getting candidacies by offer: {}", company_email);
+
+    let uuid_offer = uuid_str.to_string();
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (company:Company {email: $company_email})-[posted:POSTED]->(offer:Offer {uuid: $uuid_offer})<-[relation:CANDIDATE_TO]-(candidate:Candidate)
+            RETURN relation
+        "#,
+            )
+            .param("company_email", company_email.to_string())
+            .param("uuid_offer", uuid_offer.to_string()),
+        )
+        .await?;
+
+    let mut candidacies: Vec<Candidacy> = Vec::new();
+
+    while let Ok(Some(row)) = result.next().await {
+        let relation: Relation = row.get("relation").unwrap();
+        let custom_field: String = relation.get("custom_field").unwrap();
+        tracing::info!("Found candidacy: {custom_field}");
+        candidacies.push(Candidacy::from_relation(relation));
+    }
+
+    if !candidacies.is_empty() {
+        return Ok(Some(candidacies));
+    }
+
+    Ok(None)
+}
+
+pub async fn accept_candidacy(
+    email: String,
+    uuid_str: uuid::Uuid,
+    state: SharedState,
+) -> Result<SharedState, neo4rs::Error> {
+    tracing::info!("Accepting candidacy: {}", uuid_str);
+
+    let uuid_candidacy = uuid_str.to_string();
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (company:Company {email: $email})-[posted:POSTED]->(offer:Offer)<-[relation:CANDIDATE_TO {uuid: $uuid}]-(candidate:Candidate)
+            SET relation.status="accepted"
+            RETURN relation
+        "#,
+            )
+            .param("email", email.to_string())
+            .param("uuid", uuid_candidacy.to_string()),
+        )
+        .await?;
+
+    while let Ok(Some(row)) = result.next().await {
+        let relation: Relation = row.get("relation").unwrap();
+        let custom_field: String = relation.get("custom_field").unwrap();
+        tracing::info!("candidacy accepted: {custom_field}");
+    }
+
+    Ok(state)
+}
+
+pub async fn refuse_candidacy(
+    email: String,
+    uuid_str: uuid::Uuid,
+    state: SharedState,
+) -> Result<SharedState, neo4rs::Error> {
+    tracing::info!("Refusing candidacy: {}", uuid_str);
+
+    let uuid_candidacy = uuid_str.to_string();
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (company:Company {email: $email})-[posted:POSTED]->(offer:Offer)<-[relation:CANDIDATE_TO {uuid: $uuid}]-(candidate:Candidate)
+            SET relation.status="refused"
+            RETURN relation
+        "#,
+            )
+            .param("email", email.to_string())
+            .param("uuid", uuid_candidacy.to_string()),
+        )
+        .await?;
+
+    while let Ok(Some(row)) = result.next().await {
+        let relation: Relation = row.get("relation").unwrap();
+        let custom_field: String = relation.get("custom_field").unwrap();
+        tracing::info!("candidacy refused: {custom_field}");
+    }
+
+    Ok(state)
+}

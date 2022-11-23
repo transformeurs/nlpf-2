@@ -12,6 +12,10 @@
             {% match candidacy %}
             {% when Some with (val) %}
             <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.status }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
                 <p>{{ val.cover_letter_url }}</p>
             </div>
 
@@ -22,15 +26,24 @@
             <div class="relative mt-1 rounded-md shadow-sm">
                 <p>{{ val.custom_field }}</p>
             </div>
+            {% match auth_user %}
+            {% when Some(user) %}
 
-            <div class="relative mt-1 rounded-md shadow-sm">
-                <p>{{ val.status }}</p>
-            </div>
-
+            {% if user.user_role == "company" %}
+            <button onclick="location.href='/post_accept_candidacy/{{ val.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+                            Accepter la candidature
+            </button>
+            <button onclick="location.href='/post_refuse_candidacy/{{ val.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+                            Refuser la candidature
+            </button>
+            {% endif %}
+            {% when None %}
+            {% endmatch %}
             {% when None %}
             <p>
                 Candidacy not found
             </p>
+            
             {% endmatch %}
         </div>
     </div>

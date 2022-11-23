@@ -34,7 +34,7 @@ CREATE (o:Offer {
     location : "The Moon",
     salary : 69420,
     job_duration : "1 year and 4 mounths",
-    job_start : date("2023-10-04"),
+    job_start : date("2023-10-04")
 }) RETURN c
 
 CREATE (o)-[:POSTED]->(company)

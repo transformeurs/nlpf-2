@@ -17,4 +17,16 @@ pub fn get_router() -> Router {
             get(routes::get_candidacy_candidate),
         )
         .route("/view_candidacy/:uuid", get(routes::get_view_candidacy))
+        .route(
+            "/candidacies_by_offer/:uuid",
+            get(routes::get_view_candidacy_by_offer),
+        )
+        .route(
+            "/post_accept_candidacy/:uuid",
+            get(routes::post_accept_candidacy),
+        )
+        .route(
+            "/post_refuse_candidacy/:uuid",
+            get(routes::post_refuse_candidacy),
+        )
 }
