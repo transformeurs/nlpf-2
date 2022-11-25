@@ -170,7 +170,7 @@ async fn validate_login(
         let mut headers = HeaderMap::new();
         headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-        Ok((headers, Redirect::to("/infos")).into_response())
+        Ok((headers, Redirect::to("/offers")).into_response())
     } else {
         // User not authenticated
         Ok(Redirect::to("/?error=true").into_response())
@@ -306,17 +306,4 @@ where
 
         Ok(user)
     }
-}
-
-#[derive(Template)]
-#[template(path = "users_infos.html")]
-pub struct InfosTemplate {
-    auth_user: Option<AuthUser>,
-}
-
-/// GET handler for showing infos
-pub async fn get_infos_page(user: AuthUser) -> Result<impl IntoResponse, (StatusCode, String)> {
-    Ok(InfosTemplate {
-        auth_user: Some(user),
-    })
 }

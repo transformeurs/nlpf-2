@@ -21,32 +21,40 @@
                 </div>
             </a>
 
-            <!-- Navigation -->
-            <div class="hidden items-center space-x-4 lg:flex">
-                {% match auth_user %}
-                {% when Some(user) %}
+            {% match auth_user %}
+            {% when Some(user) %}
+            <!-- Navigation Center -->
+            <div class="flex items-center space-x-4">
                 {% if user.user_role == "candidate" %}
                 <a href="/candidacies_by_candidate">
                     <div
-                        class="cursor-pointer rounded-md border border-gray-100 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                        Voir mes candidatures
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Mes candidatures
                     </div>
                 </a>
                 {% endif %}
                 {% if user.user_role == "company" %}
                 <a href="/create_offer">
                     <div
-                        class="cursor-pointer rounded-md border border-gray-100 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                        Créer une offre
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Poster une offre
                     </div>
                 </a>
                 {% endif %}
                 <a href="/offers">
                     <div
-                        class="cursor-pointer rounded-md border border-gray-100 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                        Offres Disponible
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Offres d'emploi
                     </div>
                 </a>
+            </div>
+            {% when None %}
+            {% endmatch %}
+
+            <!-- Navigation Right (User) -->
+            <div class="flex items-center space-x-4">
+                {% match auth_user %}
+                {% when Some(user) %}
                 <img class="h-8 w-8 rounded-full" src={{ user.photo_url }} alt="" />
                 <p class="text-white">
                     {{ user.username }}
