@@ -170,13 +170,10 @@ async fn validate_login(
         let mut headers = HeaderMap::new();
         headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-        Ok((headers, Redirect::to("/infos")))
+        Ok((headers, Redirect::to("/infos")).into_response())
     } else {
         // User not authenticated
-        Err((
-            StatusCode::UNAUTHORIZED,
-            "Invalid email or password".to_string(),
-        ))
+        Ok(Redirect::to("/?error=true").into_response())
     }
 }
 
