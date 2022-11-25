@@ -1,12 +1,16 @@
 use neo4rs::{query, Node};
 
-use crate::SharedState;
+use crate::{
+    questionnaires::models::{QuestionnaireQuestion, QuestionnaireQuestionAnswer},
+    SharedState,
+};
 
 use super::models::Questionnaire;
 
 /// Create a new candidate in the database and return it
 pub async fn create_questionnaire(
     questionnaire: Questionnaire,
+    company_email: String,
     state: SharedState,
 ) -> Result<Questionnaire, neo4rs::Error> {
     tracing::info!("Creating questionnaire: {}", &questionnaire.name);
@@ -20,12 +24,12 @@ pub async fn create_questionnaire(
                 r#"
             CREATE (c:Questionnaire {
                 name: $name,
-                id: $id
+                uuid: $uuid
             })
             RETURN c
         "#,
             )
-            .param("id", questionnaire_id.to_string())
+            .param("uuid", questionnaire_id.to_string())
             .param("name", questionnaire.name.clone()),
         )
         .await?;
@@ -35,6 +39,30 @@ pub async fn create_questionnaire(
         let node: Node = row.get("c").unwrap();
         let name: String = node.get("name").unwrap();
         tracing::info!("Created questionnaire: {name}");
+    }
+
+    // Create relationship between questionnaire and company
+    let mut result_relationship_questionnaire_company = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (c:Company {email: $company_email})
+            MATCH (q:Questionnaire {uuid: $questionnaire_id})
+            CREATE (c)-[:HAS_QUESTIONNAIRE]->(q)
+        "#,
+            )
+            .param("company_email", company_email)
+            .param("questionnaire_id", questionnaire_id.to_string()),
+        )
+        .await?;
+
+    // Check if created, and log the name
+    while let Ok(Some(row)) = result_relationship_questionnaire_company.next().await {
+        let node: Node = row.get("q").unwrap();
+        let name: String = node.get("name").unwrap();
+        let node: Node = row.get("c").unwrap();
+        tracing::info!("Created relation between {} and ?", questionnaire_id);
     }
 
     // Insert questions in the database
@@ -47,13 +75,13 @@ pub async fn create_questionnaire(
                 query(
                     r#"
                 CREATE (c:Question {
-                    id: $id,
+                    uuid: $uuid,
                     question: $question
                 })
                 RETURN c
             "#,
                 )
-                .param("id", question_id.to_string())
+                .param("uuid", question_id.to_string())
                 .param("question", question.question.clone()),
             )
             .await?;
@@ -71,8 +99,8 @@ pub async fn create_questionnaire(
             .execute(
                 query(
                     r#"
-                MATCH (q:Questionnaire {id: $id_questionnaire})
-                MATCH (c:Question {id: $id_question})
+                MATCH (q:Questionnaire {uuid: $id_questionnaire})
+                MATCH (c:Question {uuid: $id_question})
                 CREATE (q)-[:HAS_QUESTION]->(c)
                 RETURN q, c
             "#,
@@ -101,14 +129,14 @@ pub async fn create_questionnaire(
                     query(
                         r#"
                     CREATE (c:Answer {
-                        id: $id,
+                        uuid: $uuid,
                         answer: $answer,
                         is_valid: $is_valid
                     })
                     RETURN c
                 "#,
                     )
-                    .param("id", answer_id.to_string())
+                    .param("uuid", answer_id.to_string())
                     .param("answer", answer.answer.clone())
                     .param("is_valid", answer.is_valid.to_string()),
                 )
@@ -127,8 +155,8 @@ pub async fn create_questionnaire(
                 .execute(
                     query(
                         r#"
-                    MATCH (q:Question {id: $id_question})
-                    MATCH (c:Answer {id: $id_answer})
+                    MATCH (q:Question {uuid: $id_question})
+                    MATCH (c:Answer {uuid: $id_answer})
                     CREATE (q)-[:HAS_ANSWER]->(c)
                     RETURN q, c
                 "#,
@@ -150,4 +178,176 @@ pub async fn create_questionnaire(
     }
 
     Ok(questionnaire)
+}
+
+/// Get a questionnaires by company
+pub async fn get_questionnaires_by_company_email(
+    email: String,
+    state: SharedState,
+) -> Result<Vec<Questionnaire>, neo4rs::Error> {
+    tracing::info!("Getting questionnaires by company email: {}", email);
+
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (c:Company {email:$email})
+            MATCH (c)-[POSTED]-(q:Questionnaire) 
+            RETURN q
+        "#,
+            )
+            .param("email", email.to_string()),
+        )
+        .await?;
+
+    let mut questionnaires: Vec<Questionnaire> = Vec::new();
+
+    while let Ok(Some(row)) = result.next().await {
+        let node: Node = row.get("q").unwrap();
+        let uuid: String = node.get("uuid").unwrap();
+        let name: String = node.get("name").unwrap();
+        tracing::info!("Found questionnaire: {name}");
+        questionnaires.push(get_questionnaire_by_id(uuid, state.clone()).await?.unwrap());
+    }
+
+    Ok(questionnaires)
+}
+
+/// Delete a questionnaire by id
+pub async fn delete_questionnaire_by_id(
+    questionnaire_id: String,
+    state: SharedState,
+) -> Result<(), neo4rs::Error> {
+    tracing::info!("Deleting questionnaire by id: {}", questionnaire_id);
+
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (q:Questionnaire {uuid:$uuid})
+            DETACH DELETE q
+            RETURN q
+        "#,
+            )
+            .param("uuid", questionnaire_id.to_string()),
+        )
+        .await?;
+
+    while let Ok(Some(row)) = result.next().await {
+        let node: Node = row.get("q").unwrap();
+        let name: String = node.get("name").unwrap();
+        tracing::info!("Deleted questionnaire: {name}");
+    }
+
+    Ok(())
+}
+
+/// Get a questionnaire by id
+pub async fn get_questionnaire_by_id(
+    questionnaire_id: String,
+    state: SharedState,
+) -> Result<Option<Questionnaire>, neo4rs::Error> {
+    tracing::info!("Getting questionnaire by id: {}", questionnaire_id);
+
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (q:Questionnaire {uuid:$uuid})
+            RETURN q
+        "#,
+            )
+            .param("uuid", questionnaire_id.to_string()),
+        )
+        .await?;
+
+    while let Ok(Some(row)) = result.next().await {
+        let node: Node = row.get("q").unwrap();
+        let name: String = node.get("name").unwrap();
+        tracing::info!("Found questionnaire: {name} Get questions by questionnaire id");
+
+        let uuid: String = node.get("uuid").unwrap();
+        let name: String = node.get("name").unwrap();
+
+        let mut questions: Vec<QuestionnaireQuestion> = Vec::new();
+
+        // Get questions of the questionnaire
+        let mut result_question = state
+            .graph
+            .execute(
+                query(
+                    r#"
+                MATCH (q:Questionnaire {uuid:$uuid})
+                MATCH (q)-[HAS_QUESTION]-(c:Question) 
+                RETURN c
+            "#,
+                )
+                .param("uuid", questionnaire_id.to_string()),
+            )
+            .await?;
+
+        while let Ok(Some(row)) = result_question.next().await {
+            let node: Node = row.get("c").unwrap();
+            let question: String = node.get("question").unwrap();
+            tracing::info!("Found question: {question}");
+
+            let uuid: String = node.get("uuid").unwrap();
+            let question: String = node.get("question").unwrap();
+
+            let mut answers: Vec<QuestionnaireQuestionAnswer> = Vec::new();
+
+            // Get answers of the question
+            let mut result_answer = state
+                .graph
+                .execute(
+                    query(
+                        r#"
+                    MATCH (q:Question {uuid:$uuid})
+                    MATCH (q)-[HAS_ANSWER]-(c:Answer) 
+                    RETURN c
+                "#,
+                    )
+                    .param("uuid", uuid.to_string()),
+                )
+                .await?;
+
+            while let Ok(Some(row)) = result_answer.next().await {
+                let node: Node = row.get("c").unwrap();
+                let answer: String = node.get("answer").unwrap();
+                tracing::info!("Found answer: {answer}");
+
+                let uuid: String = node.get("uuid").unwrap();
+                let answer: String = node.get("answer").unwrap();
+                let is_valid_string: String = node.get("is_valid").unwrap();
+
+                let mut is_valid: bool = false;
+                if is_valid_string == "true" {
+                    is_valid = true;
+                }
+
+                answers.push(QuestionnaireQuestionAnswer {
+                    uuid,
+                    answer,
+                    is_valid,
+                });
+            }
+
+            questions.push(QuestionnaireQuestion {
+                uuid,
+                question,
+                answers,
+            });
+        }
+
+        return Ok(Some(Questionnaire {
+            uuid,
+            name,
+            questions,
+        }));
+    }
+
+    Ok(None)
 }

@@ -3,16 +3,19 @@ use neo4rs::Node;
 use std::{collections::HashMap, num};
 
 pub struct QuestionnaireQuestionAnswer {
+    pub uuid: String,
     pub answer: String,
     pub is_valid: bool,
 }
 
 pub struct QuestionnaireQuestion {
+    pub uuid: String,
     pub question: String,
     pub answers: Vec<QuestionnaireQuestionAnswer>,
 }
 
 pub struct Questionnaire {
+    pub uuid: String,
     pub name: String,
     pub questions: Vec<QuestionnaireQuestion>,
 }
@@ -29,6 +32,7 @@ impl Questionnaire {
             if key.starts_with("question") {
                 let question_id: i32 = key.split("-").collect::<Vec<&str>>()[1].parse().unwrap();
                 let mut question = QuestionnaireQuestion {
+                    uuid: String::new(),
                     question: value.clone(),
                     answers: Vec::new(),
                 };
@@ -50,6 +54,7 @@ impl Questionnaire {
                         }
 
                         let answer = QuestionnaireQuestionAnswer {
+                            uuid: String::new(),
                             answer: value.clone(),
                             is_valid: answer_validity_bool,
                         };
@@ -61,24 +66,10 @@ impl Questionnaire {
             }
         }
 
-        Questionnaire { name, questions }
+        Questionnaire {
+            uuid: String::new(),
+            name,
+            questions,
+        }
     }
-
-    // pub fn from_node(node: Node) -> Self {
-    //     let name: String = node.get("name").unwrap();
-    //     let email: String = node.get("email").unwrap();
-    //     let password: String = node.get("password").unwrap();
-    //     let age: i64 = node.get("age").unwrap();
-    //     let photo_url: String = node.get("photo_url").unwrap();
-    //     let description: String = node.get("description").unwrap();
-
-    //     Questionnaire {
-    //     //     name,
-    //     //     email,
-    //     //     password,
-    //     //     age,
-    //     //     photo_url,
-    //     //     description,
-    //     }
-    // }
 }
