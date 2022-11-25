@@ -1,0 +1,38 @@
+<li>
+    <div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
+        <div class="px-4 py-8 sm:px-10">
+            <div class="mt-6">
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ candidacy.1.name }}</p>
+                </div>
+
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ candidacy.1.email }}</p>
+                </div>
+
+                <div class="rcandidacyelative mt-1 rounded-md shadow-sm">
+                    <p>{{ candidacy.1.age }}</p>
+                </div>
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ candidacy.0.status }}</p>
+                </div>
+
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ candidacy.0.custom_field }}</p>
+                </div>
+
+                <div class="rcandidacyelative mt-1 rounded-md shadow-sm">
+                    <p>{{ candidacy.0.resume_url }}</p>
+                </div>
+
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ candidacy.0.cover_letter_url }}</p>
+                </div>
+
+                <button onclick="location.href='/view_candidacy/{{ candidacy.0.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+                    Voir la candidature
+                </button>
+            </div>
+        </div>
+    </div>
+</li>

@@ -12,28 +12,40 @@
             {% match candidacy %}
             {% when Some with (val) %}
             <div class="relative mt-1 rounded-md shadow-sm">
-                <p>{{ val.status }}</p>
+                <p>{{ val.1.name }}</p>
             </div>
 
             <div class="relative mt-1 rounded-md shadow-sm">
-                <p>{{ val.cover_letter_url }}</p>
+                <p>{{ val.1.email }}</p>
             </div>
 
             <div class="relative mt-1 rounded-md shadow-sm">
-                <p>{{ val.resume_url }}</p>
+                <p>{{ val.1.age }}</p>
             </div>
 
             <div class="relative mt-1 rounded-md shadow-sm">
-                <p>{{ val.custom_field }}</p>
+                <p>{{ val.0.status }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.0.cover_letter_url }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.0.resume_url }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.0.custom_field }}</p>
             </div>
             {% match auth_user %}
             {% when Some(user) %}
 
             {% if user.user_role == "company" %}
-            <button onclick="location.href='/post_accept_candidacy/{{ val.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+            <button onclick="location.href='/post_accept_candidacy/{{ val.0.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
                             Accepter la candidature
             </button>
-            <button onclick="location.href='/post_refuse_candidacy/{{ val.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+            <button onclick="location.href='/post_refuse_candidacy/{{ val.0.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
                             Refuser la candidature
             </button>
             {% endif %}

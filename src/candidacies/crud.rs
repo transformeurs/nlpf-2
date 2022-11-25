@@ -1,7 +1,7 @@
-use neo4rs::{query, Relation};
+use neo4rs::{query, Node, Relation};
 
 use super::models::Candidacy;
-use crate::SharedState;
+use crate::{users::models::Candidate, SharedState};
 
 /// Create a new candidacy in the database and put it in neo4j
 pub async fn create_candidacy(
@@ -90,7 +90,7 @@ pub async fn candidacy_by_candidate(
 pub async fn candidacy(
     uuid_str: uuid::Uuid,
     state: SharedState,
-) -> Result<Option<Candidacy>, neo4rs::Error> {
+) -> Result<Option<(Candidacy, Candidate)>, neo4rs::Error> {
     let uuid = uuid_str.to_string();
     tracing::info!("Getting candidacy by uuid: {}", uuid);
 
@@ -101,7 +101,7 @@ pub async fn candidacy(
                 r#"
             MATCH (c:Candidate)-[r:CANDIDATE_TO]->(o:Offer)
             WHERE r.uuid = $uuid
-            RETURN r
+            RETURN r, c
         "#,
             )
             .param("uuid", uuid),
@@ -109,10 +109,16 @@ pub async fn candidacy(
         .await?;
 
     if let Ok(Some(row)) = result.next().await {
+        let node: Node = row.get("c").unwrap();
         let relation: Relation = row.get("r").unwrap();
         let custom_field: String = relation.get("custom_field").unwrap();
+        let name: String = node.get("name").unwrap();
         tracing::info!("Found offer: {custom_field}");
-        return Ok(Some(Candidacy::from_relation(relation)));
+        tracing::info!("Found candidate: {name}");
+        return Ok(Some((
+            Candidacy::from_relation(relation),
+            Candidate::from_node(node),
+        )));
     }
 
     Ok(None)
@@ -122,7 +128,7 @@ pub async fn candidacy_by_offer(
     company_email: String,
     uuid_str: uuid::Uuid,
     state: SharedState,
-) -> Result<Option<Vec<Candidacy>>, neo4rs::Error> {
+) -> Result<Option<Vec<(Candidacy, Candidate)>>, neo4rs::Error> {
     tracing::info!("Getting candidacies by offer: {}", company_email);
 
     let uuid_offer = uuid_str.to_string();
@@ -132,7 +138,7 @@ pub async fn candidacy_by_offer(
             query(
                 r#"
             MATCH (company:Company {email: $company_email})-[posted:POSTED]->(offer:Offer {uuid: $uuid_offer})<-[relation:CANDIDATE_TO]-(candidate:Candidate)
-            RETURN relation
+            RETURN relation, candidate
         "#,
             )
             .param("company_email", company_email.to_string())
@@ -140,13 +146,19 @@ pub async fn candidacy_by_offer(
         )
         .await?;
 
-    let mut candidacies: Vec<Candidacy> = Vec::new();
+    let mut candidacies: Vec<(Candidacy, Candidate)> = Vec::new();
 
     while let Ok(Some(row)) = result.next().await {
+        let candidate: Node = row.get("candidate").unwrap();
         let relation: Relation = row.get("relation").unwrap();
+        let name: String = candidate.get("name").unwrap();
         let custom_field: String = relation.get("custom_field").unwrap();
+        tracing::info!("Found candidate: {name}");
         tracing::info!("Found candidacy: {custom_field}");
-        candidacies.push(Candidacy::from_relation(relation));
+        candidacies.push((
+            Candidacy::from_relation(relation),
+            Candidate::from_node(candidate),
+        ));
     }
 
     if !candidacies.is_empty() {

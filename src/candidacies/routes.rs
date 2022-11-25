@@ -15,7 +15,11 @@ use super::{
     },
     models::Candidacy,
 };
-use crate::{users::models::AuthUser, utils::s3::upload_bytes_to_s3, SharedState};
+use crate::{
+    users::models::{AuthUser, Candidate},
+    utils::s3::upload_bytes_to_s3,
+    SharedState,
+};
 
 #[derive(Template)]
 #[template(path = "candidacies/create_candidacy.html")]
@@ -179,7 +183,7 @@ pub async fn get_candidacy_candidate(
 #[template(path = "candidacies/view_candidacy.html")]
 pub struct ViewCandidacyTemplate {
     auth_user: Option<AuthUser>,
-    candidacy: Option<Candidacy>,
+    candidacy: Option<(Candidacy, Candidate)>,
 }
 
 pub async fn get_view_candidacy(
@@ -207,7 +211,7 @@ pub async fn get_view_candidacy(
 #[template(path = "candidacies/candidacies_by_offer.html")]
 pub struct ViewCandidacyByOfferTemplate {
     auth_user: Option<AuthUser>,
-    candidacies: Option<Vec<Candidacy>>,
+    candidacies: Option<Vec<(Candidacy, Candidate)>>,
 }
 
 pub async fn get_view_candidacy_by_offer(

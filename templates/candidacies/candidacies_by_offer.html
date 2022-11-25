@@ -13,7 +13,7 @@
   {% match candidacies %}
   {% when Some with (val) %}
   {% for candidacy in val %}
-  {% include "candidacies/candidacy.html" %}
+  {% include "candidacies/candidacy_by_offer.html" %}
   {% endfor %}
   {% when None %}
   <li class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
