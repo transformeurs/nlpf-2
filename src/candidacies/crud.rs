@@ -5,12 +5,11 @@ use crate::SharedState;
 
 /// Create a new candidacy in the database and put it in neo4j
 pub async fn create_candidacy(
-    uuid_str: uuid::Uuid,
+    uuid_offer: uuid::Uuid,
     candidate_email: String,
     candidacy: Candidacy,
     state: SharedState,
 ) -> Result<Candidacy, neo4rs::Error> {
-    let uuid_offer = uuid_str.to_string();
     tracing::info!("Creating candidacy: {}", &candidate_email);
 
     let mut result = state
@@ -38,7 +37,7 @@ pub async fn create_candidacy(
             .param("cover_letter_url", candidacy.cover_letter_url.clone())
             .param("resume_url", candidacy.resume_url.clone())
             .param("custom_field", candidacy.custom_field.clone())
-            .param("uuid_offer", uuid_offer),
+            .param("uuid_offer", uuid_offer.to_string()),
         )
         .await?;
 

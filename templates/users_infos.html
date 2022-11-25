@@ -9,7 +9,7 @@
 <h1 class="text-3xl font-bold m-5 text-white">
     {% match auth_user %}
     {% when Some with (val) %}
-    Found {{ val.email }}. You're logged in.
+    Found {{ val.username }}. You're logged in.
     {% when None %}
     No user found. You're not logged in.
     {% endmatch %}

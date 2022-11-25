@@ -138,6 +138,8 @@ static COOKIE_NAME: &str = "SESSION";
 
 async fn validate_login(
     email: String,
+    username: String,
+    photo_url: String,
     password: String,
     hashed_password: String,
     user_role: String,
@@ -149,7 +151,15 @@ async fn validate_login(
         // User successfully authenticated
         let mut session = Session::new();
         session
-            .insert("user", AuthUser { user_role, email })
+            .insert(
+                "user",
+                AuthUser {
+                    user_role,
+                    username,
+                    email,
+                    photo_url,
+                },
+            )
             .unwrap();
 
         let cookie = store.store_session(session).await.unwrap().unwrap();
@@ -190,6 +200,8 @@ pub async fn post_login_page(
         {
             return validate_login(
                 candidate.email,
+                candidate.name,
+                candidate.photo_url,
                 input.password,
                 candidate.password,
                 input.user_role,
@@ -210,6 +222,8 @@ pub async fn post_login_page(
         {
             return validate_login(
                 company.email,
+                company.name,
+                company.photo_url,
                 input.password,
                 company.password,
                 input.user_role,
