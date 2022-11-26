@@ -3,19 +3,18 @@
         <div class="px-4 py-8 sm:px-10">
             <div class="mt-6">
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ candidacy.status }}</p>
+                    <p>Statut de la candidature : {{ candidacy.status }}</p>
                 </div>
 
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ candidacy.custom_field }}</p>
+                    <p>Description de la candidature : {{ candidacy.custom_field }}</p>
                 </div>
 
                 <div class="rcandidacyelative mt-1 rounded-md shadow-sm">
-                    <p>{{ candidacy.resume_url }}</p>
-                </div>
+                    <a href={{candidacy.resume_url}} style="color:#0000FF;" target="_blank">CV du candidat</a>                </div>
 
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ candidacy.cover_letter_url }}</p>
+                     <a href={{candidacy.cover_letter_url}} style="color:#0000FF;" target="_blank">Lettre de motivation du candidat</a>
                 </div>
 
                 <button onclick="location.href='/view_candidacy/{{ candidacy.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
