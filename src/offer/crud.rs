@@ -1,7 +1,7 @@
 use neo4rs::{query, Node};
 
 use super::models::Offer;
-use crate::SharedState;
+use crate::{users::models::Company, SharedState};
 
 // Create a new offer made by a company and put it in neo4j
 pub async fn create_offer(
@@ -98,7 +98,7 @@ pub async fn offer_by_company(
             query(
                 r#"
             MATCH (c:Company {email:$email})
-            MATCH (c)-[POSTED]-(o:Offer) 
+            MATCH (c)-[POSTED]-(o:Offer)
             RETURN o
         "#,
             )
@@ -123,10 +123,10 @@ pub async fn offer_by_company(
 }
 
 // Return a single offer in an other page
-pub async fn offer(
+pub async fn offer_with_company(
     uuid_str: uuid::Uuid,
     state: SharedState,
-) -> Result<Option<Offer>, neo4rs::Error> {
+) -> Result<Option<(Offer, Company)>, neo4rs::Error> {
     let uuid = uuid_str.to_string();
     tracing::info!("Getting offer by uuid: {}", uuid);
 
@@ -135,8 +135,8 @@ pub async fn offer(
         .execute(
             query(
                 r#"
-            MATCH (o:Offer {uuid: $uuid})
-            RETURN o
+            MATCH (o:Offer {uuid: $uuid})<-[:POSTED]-(c:Company)
+            RETURN o, c
         "#,
             )
             .param("uuid", uuid),
@@ -144,10 +144,12 @@ pub async fn offer(
         .await?;
 
     if let Ok(Some(row)) = result.next().await {
-        let node: Node = row.get("o").unwrap();
-        let title: String = node.get("title").unwrap();
-        tracing::info!("Found offer: {title}");
-        return Ok(Some(Offer::from_node(node)));
+        let offer_node: Node = row.get("o").unwrap();
+        let company_node: Node = row.get("c").unwrap();
+        return Ok(Some((
+            Offer::from_node(offer_node),
+            Company::from_node(company_node),
+        )));
     }
 
     Ok(None)

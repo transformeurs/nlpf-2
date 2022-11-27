@@ -1,48 +1,56 @@
 <li>
-    <div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
-        <div class="px-4 py-8 sm:px-10">
-            <div class="mt-6">
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.title }}</p>
+    <div class="flex rounded bg-white p-6 shadow-lg">
+        <!-- Box content -->
+        <div class="w-full">
+            <a href="/view_offer/{{ offer.uuid }}">
+                <div class="cursor-pointer text-xl font-semibold text-indigo-700">
+                    {{ offer.title }}
                 </div>
+            </a>
 
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.description }}</p>
+            <div class="mt-0.5 flex items-center text-sm text-gray-600">
+                <div class="flex">
+                    <!-- <CalendarIcon class="mr-1 h-5 w-5" /> -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="mr-1 h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                    </svg>
+                    Postée le {{ offer.created_at }}
                 </div>
-
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.created_at }}</p>
+                <div class="ml-2 flex">
+                    <!-- <BriefcaseIconSolid class="mr-1 h-5 w-5" /> -->
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
+                        class="mr-1 h-5 w-5">
+                        <path fill-rule="evenodd"
+                            d="M7.5 5.25a3 3 0 013-3h3a3 3 0 013 3v.205c.933.085 1.857.197 2.774.334 1.454.218 2.476 1.483 2.476 2.917v3.033c0 1.211-.734 2.352-1.936 2.752A24.726 24.726 0 0112 15.75c-2.73 0-5.357-.442-7.814-1.259-1.202-.4-1.936-1.541-1.936-2.752V8.706c0-1.434 1.022-2.7 2.476-2.917A48.814 48.814 0 017.5 5.455V5.25zm7.5 0v.09a49.488 49.488 0 00-6 0v-.09a1.5 1.5 0 011.5-1.5h3a1.5 1.5 0 011.5 1.5zm-3 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z"
+                            clip-rule="evenodd" />
+                        <path
+                            d="M3 18.4v-2.796a4.3 4.3 0 00.713.31A26.226 26.226 0 0012 17.25c2.892 0 5.68-.468 8.287-1.335.252-.084.49-.189.713-.311V18.4c0 1.452-1.047 2.728-2.523 2.923-2.12.282-4.282.427-6.477.427a49.19 49.19 0 01-6.477-.427C4.047 21.128 3 19.852 3 18.4z" />
+                    </svg>
+                    {{ offer.job_duration }}
                 </div>
+            </div>
 
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.salary }}</p>
+            <div class="my-3">
+                {{ offer.description }}
+            </div>
+
+            <div class="mt-4 flex space-x-2">
+                {% for skill in offer.skills %}
+                <div class="rounded-2xl border border-gray-400 px-2 py-0.5 text-gray-500">
+                    {{ skill }}
                 </div>
+                {% endfor %}
+            </div>
+        </div>
 
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.salary }}</p>
-                </div>
-
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    {% for skill in offer.skills %}
-                    <p>{{ skill }} </p>
-                    {% endfor %}
-                </div>
-
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.location }}</p>
-                </div>
-
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.job_duration }}</p>
-                </div>
-
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <p>{{ offer.job_start }}</p>
-                </div>
-
+        <!-- Right content -->
+        <div class="flex flex-col">
+            <div class="space-y-1">
                 <button onclick="location.href='/view_offer/{{ offer.uuid }}'"
-                    class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
-                    Voir l'offre
+                    class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-6 py-3 text-base">
+                    Consulter
                 </button>
             </div>
         </div>
