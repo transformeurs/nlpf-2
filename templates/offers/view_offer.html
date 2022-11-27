@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}View Offer{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+<div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
+    <div class="px-4 py-8 sm:px-10">
+        <div class="mt-6">
+            {% match offer %}
+            {% when Some with (val) %}
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.title }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.description }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.created_at }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.salary }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.salary }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                {% for skill in val.skills %}
+                    <p>{{ skill }} </p>
+                {% endfor %}
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.location }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.job_duration }}</p>
+            </div>
+
+            <div class="relative mt-1 rounded-md shadow-sm">
+                <p>{{ val.job_start }}</p>
+            </div>
+            
+            {% when None %}
+            <p>
+                Offer not found
+            </p>
+            {% endmatch %}
+        </div>
+    </div>
+</div>
+{% endblock %}

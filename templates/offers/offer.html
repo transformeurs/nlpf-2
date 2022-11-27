@@ -1,0 +1,49 @@
+<li>
+    <div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
+        <div class="px-4 py-8 sm:px-10">
+            <div class="mt-6">
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.title }}</p>
+                </div>
+    
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.description }}</p>
+                </div>
+    
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.created_at }}</p>
+                </div>
+    
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.salary }}</p>
+                </div>
+
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.salary }}</p>
+                </div>
+
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    {% for skill in offer.skills %}
+                        <p>{{ skill }} </p>
+                    {% endfor %}
+                </div>
+
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.location }}</p>
+                </div>
+    
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.job_duration }}</p>
+                </div>
+    
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <p>{{ offer.job_start }}</p>
+                </div>
+    
+                <button onclick="location.href='/view_offer/{{ offer.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+                    Voir l'offre
+                </button>
+            </div>
+        </div>
+    </div>
+</li>

@@ -47,6 +47,12 @@ services:
         mc mb myminio/profile-pictures --ignore-existing
         mc anonymous set download myminio/profile-pictures
 
+        mc mb myminio/resume --ignore-existing
+        mc anonymous set download myminio/resume
+
+        mc mb myminio/cover-letter --ignore-existing
+        mc anonymous set download myminio/cover-letter
+
 volumes:
   nlpf_db_data:
   nlpf_s3_data:
