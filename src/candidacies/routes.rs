@@ -10,12 +10,13 @@ use uuid::Uuid;
 
 use super::{
     crud::{
-        accept_candidacy, candidacy, candidacy_by_candidate, candidacy_by_offer, create_candidacy,
-        refuse_candidacy,
+        accept_candidacy, candidacies_by_company, candidacy, candidacy_by_candidate,
+        candidacy_by_offer, create_candidacy, refuse_candidacy,
     },
     models::Candidacy,
 };
 use crate::{
+    offer::models::Offer,
     users::models::{AuthUser, Candidate},
     utils::s3::upload_bytes_to_s3,
     SharedState,
@@ -134,48 +135,31 @@ pub async fn post_create_candidacy(
 
 #[derive(Template)]
 #[template(path = "candidacies/candidacies.html")]
-pub struct CandidacyTemplate {
+pub struct CandidaciesTemplate {
     auth_user: Option<AuthUser>,
-    candidacies: Option<Vec<Candidacy>>,
+    candidacies: Option<Vec<(Candidacy, Offer)>>,
 }
 
-pub async fn get_candidacy(
+pub async fn get_candidacies(
     user: AuthUser,
     Extension(state): Extension<SharedState>,
-) -> CandidacyTemplate {
-    let mut l_candidacies: Option<Vec<Candidacy>> = Some(Vec::new());
-    //if user.user_role == "candidate" {
-    //    l_candidacies = candidacies(state).await.unwrap();
+) -> CandidaciesTemplate {
+    let l_candidacies;
     if user.user_role == "company" {
+        l_candidacies = candidacies_by_company(user.email.clone(), state)
+            .await
+            .unwrap();
+    } else if user.user_role == "candidate" {
         l_candidacies = candidacy_by_candidate(user.email.clone(), state)
             .await
             .unwrap();
+    } else {
+        l_candidacies = None;
     }
 
-    CandidacyTemplate {
+    CandidaciesTemplate {
         auth_user: Some(user),
         candidacies: l_candidacies,
-    }
-}
-
-#[derive(Template)]
-#[template(path = "candidacies/candidacies.html")]
-pub struct CandidacyCandidateTemplate {
-    auth_user: Option<AuthUser>,
-    candidacies: Option<Vec<Candidacy>>,
-}
-
-pub async fn get_candidacy_candidate(
-    user: AuthUser,
-    Extension(state): Extension<SharedState>,
-) -> CandidacyCandidateTemplate {
-    let list_candidacies = candidacy_by_candidate(user.email.clone(), state)
-        .await
-        .unwrap();
-
-    CandidacyCandidateTemplate {
-        auth_user: Some(user),
-        candidacies: list_candidacies,
     }
 }
 

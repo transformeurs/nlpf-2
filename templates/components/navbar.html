@@ -25,14 +25,16 @@
             {% when Some(user) %}
             <!-- Navigation Center -->
             <div class="flex items-center space-x-4">
-                {% if user.user_role == "candidate" %}
-                <a href="/candidacies_by_candidate">
+                <a href="/candidacies">
                     <div
                         class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        {% if user.user_role == "candidate" %}
                         Mes candidatures
+                        {% else if user.user_role == "company" %}
+                        Candidatures reçues
+                        {% endif %}
                     </div>
                 </a>
-                {% endif %}
                 {% if user.user_role == "company" %}
                 <a href="/create_offer">
                     <div

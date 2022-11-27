@@ -6,60 +6,80 @@
 {% endblock %}
 
 {% block content %}
+<h1 class="text-3xl font-bold m-5 text-white">
+    {% match candidacy %}
+    {% when Some with (val) %}
+    Candidature {{ val.1.name }}
+    {% when None %}
+    Candidature not found
+    {% endmatch %}
+</h1>
 <div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
     <div class="px-4 py-8 sm:px-10">
         <div class="mt-6">
             {% match candidacy %}
             {% when Some with (val) %}
-            <div class="relative mt-1 rounded-md shadow-sm">
+            <div class="relative mt-1 rounded-md">
                 <p>Nom du candidat : {{ val.1.name }}</p>
             </div>
 
-            <div class="relative mt-1 rounded-md shadow-sm">
+            <div class="relative mt-1 rounded-md">
                 <p>Email du candidat : {{ val.1.email }}</p>
             </div>
 
-            <div class="relative mt-1 rounded-md shadow-sm">
+            <div class="relative mt-1 rounded-md">
                 <p>Age du candidat : {{ val.1.age }} ans</p>
             </div>
 
-            <div class="relative mt-1 rounded-md shadow-sm">
-                <p>Statut de la candidature : {{ val.0.status }}</p>
+            <div class="relative mt-1 rounded-md">
+                <p>
+                    Statut de la candidature :
+                    {% if val.0.status == "pending" %}
+                    <span class="text-orange-500">En attente</span>
+                    {% else if val.0.status == "accepted" %}
+                    <span class="text-green-500">Acceptée</span>
+                    {% else if val.0.status == "refused" %}
+                    <span class="text-red-500">Refusée</span>
+                    {% endif %}
+                </p>
             </div>
 
-            <div class="relative mt-1 rounded-md shadow-sm">
-                <p>Description de la candidature : {{ val.0.custom_field }}</p>
+            <div class="relative mt-1 rounded-md">
+                <p>Message supplémentaire : </p>
+                <p>{{ val.0.custom_field }}</p>
             </div>
 
-            <div class="relative mt-1 rounded-md shadow-sm">
+            <div class="relative mt-1 rounded-md">
                 <a href={{val.0.resume_url}} style="color:#0000FF;" target="_blank">CV du candidat</a>
             </div>
 
-            <div class="relative mt-1 rounded-md shadow-sm">
-                <a href={{val.0.cover_letter_url}} style="color:#0000FF;" target="_blank">Lettre de motivation du candidat</a>
+            <div class="relative mt-1 rounded-md">
+                <a href={{val.0.cover_letter_url}} style="color:#0000FF;" target="_blank">Lettre de motivation du
+                    candidat</a>
             </div>
 
-
-
-            
             {% match auth_user %}
             {% when Some(user) %}
 
             {% if user.user_role == "company" %}
-            <button onclick="location.href='/post_accept_candidacy/{{ val.0.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
-                            Accepter la candidature
-            </button>
-            <button onclick="location.href='/post_refuse_candidacy/{{ val.0.uuid }}'" class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
-                            Refuser la candidature
-            </button>
+            <div class="flex space-x-4">
+                <button onclick="location.href='/post_accept_candidacy/{{ val.0.uuid }}'"
+                    class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 px-4 py-2 text-sm">
+                    Accepter la candidature
+                </button>
+                <button onclick="location.href='/post_refuse_candidacy/{{ val.0.uuid }}'"
+                    class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 px-4 py-2 text-sm">
+                    Refuser la candidature
+                </button>
+            </div>
             {% endif %}
+
             {% when None %}
             {% endmatch %}
             {% when None %}
             <p>
                 Candidacy not found
             </p>
-            
             {% endmatch %}
         </div>
     </div>

@@ -1,13 +1,31 @@
 {% extends "base.html" %}
 
-{% block title %}Mes candidatures{% endblock %}
+{% block title %}
+{% match auth_user %}
+{% when Some with (val) %}
+{% if val.user_role == "company" %}
+Candidatures reçues
+{% else if val.user_role == "candidate" %}
+Mes candidatures
+{% endif %}
+{% when None %}
+{% endmatch %}
+{% endblock %}
 
 {% block head %}
 {% endblock %}
 
 {% block content %}
 <h1 class="text-3xl font-bold m-5 text-white">
+  {% match auth_user %}
+  {% when Some with (val) %}
+  {% if val.user_role == "company" %}
+  Candidatures reçues
+  {% else if val.user_role == "candidate" %}
   Mes candidatures
+  {% endif %}
+  {% when None %}
+  {% endmatch %}
 </h1>
 <ul class="flex flex-col space-y-4">
   {% match candidacies %}
