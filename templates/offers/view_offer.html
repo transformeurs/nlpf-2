@@ -134,7 +134,31 @@ Offre introuvable
         {% when None %}
         {% endmatch %}
     </div>
+
+    <!-- Questionnaire -->
+    <div class="col-span-6 rounded-lg bg-white p-8 shadow">
+        {% match questionnaire %}
+            {% when Some(q) %}
+            <div class="space-y-4 mt-2">
+                {% for question in q.questions %}
+                <div>
+                    <div class="text-lg font-semibold">{{ question.question }}</div>
+                    <div class="flex space-x-2 mt-2">
+                        {% for answer in question.answers %}
+                            <div class="font-semibold rounded-lg border border-gray-400 hover:bg-gray-100 px-2 py-1">{{ answer.answer }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% when None %}
+                <div>
+                    Aucun questionnaire associé à cette offre.
+                </div>
+        {% endmatch %}
+    </div>
 </div>
+
 
 {% when None %}
 <div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">

@@ -13,6 +13,10 @@ use super::{
     models::Offer,
 };
 use crate::{
+    questionnaires::{
+        crud::{delete_questionnaire_by_id, get_questionnaire_by_id},
+        models::Questionnaire,
+    },
     users::models::{AuthUser, Company},
     SharedState,
 };
@@ -126,6 +130,7 @@ pub async fn post_create_offer(
 pub struct ViewOfferTemplate {
     auth_user: Option<AuthUser>,
     offer_with_company: Option<(Offer, Company)>,
+    questionnaire: Option<Questionnaire>,
 }
 
 pub async fn get_view_offer(
@@ -138,12 +143,16 @@ pub async fn get_view_offer(
         return ViewOfferTemplate {
             auth_user: Some(user),
             offer_with_company: None,
+            questionnaire: None,
         };
     }
-    let crud_res = offer_with_company(uuid.unwrap(), state).await.unwrap();
+    let offer_id = uuid.unwrap();
+    let crud_res = offer_with_company(offer_id, state.clone()).await.unwrap();
+    let questionnaire = get_questionnaire_by_id(offer_id.to_string(), state.clone()).await;
 
     ViewOfferTemplate {
         auth_user: Some(user),
         offer_with_company: crud_res,
+        questionnaire: questionnaire.unwrap(),
     }
 }
