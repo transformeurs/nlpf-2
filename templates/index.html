@@ -58,6 +58,12 @@
                         </div>
                     </div>
 
+                    {% if signin_error %}
+                    <div class="text-red-500 text-center">
+                        Courriel ou mot de passe invalide !
+                    </div>
+                    {% endif %}
+
                     <div class="relative mt-1 rounded-md shadow-sm">
                         <input type="email" id="email" name="email" autocomplete="email"
                             placeholder="Votre adresse de courriel"

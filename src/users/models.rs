@@ -8,6 +8,8 @@ use serde::{Deserialize, Serialize};
 pub struct AuthUser {
     pub user_role: String,
     pub email: String,
+    pub username: String,
+    pub photo_url: String,
 }
 
 pub struct Candidate {
