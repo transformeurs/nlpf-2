@@ -15,52 +15,51 @@
             <form action="/create_offer" method="post" enctype="multipart/form-data" autocomplete="on"
                 class="space-y-6">
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <input type="text" name="title" placeholder="Title of the offer"
+                    <input type="text" name="title" placeholder="Titre de l'offre"
                         class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
                         required>
                 </div>
 
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <input type="text" name="description" placeholder="Une description de l'offre"
+                    <textarea name="description" placeholder="Description" maxlength="1000"
+                        class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
+                        required></textarea>
+                </div>
+
+                <div class="relative mt-1 rounded-md shadow-sm">
+                    <input type="text" name="skills" placeholder="Compétences nécessaires (séparer par une virgule)"
                         class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
                         required>
                 </div>
 
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <input type="text" name="skills"
-                        placeholder="Les skills nécesseraire pour l'offre (séparer par une virgule)"
+                    <input type="text" name="location" placeholder="Localisation"
                         class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
                         required>
                 </div>
 
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <input type="text" name="location" placeholder="Où l'offre se localisera"
+                    <input type="number" name="salary" placeholder="Salaire annuel"
                         class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
                         required>
                 </div>
 
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <input type="text" name="salary" placeholder="Combien sera le salaire (entier)"
+                    <input type="text" name="job_duration" placeholder="Durée du contrat"
                         class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
                         required>
                 </div>
 
                 <div class="relative mt-1 rounded-md shadow-sm">
-                    <input type="text" name="job_duration" placeholder="Durée de l'offre"
+                    <input type="text" name="job_start" placeholder="Début de l'offre d'emploi"
                         class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
                         required>
                 </div>
 
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    <input type="text" name="job_start" placeholder="Quand l'offre débutera"
-                        class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
-                        required>
-                </div>
-
-                <div>
+                <div class="flex justify-center items-center">
                     <a href="/view_offer">
                         <button type="submit"
-                            class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
+                            class="w-64 mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
                             Créer l'offre
                         </button>
                     </a>
