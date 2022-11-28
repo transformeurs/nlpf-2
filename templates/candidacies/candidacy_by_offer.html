@@ -4,7 +4,7 @@
         <div class="w-full">
             <a href="/view_candidacy/{{ candidacy.0.uuid }}">
                 <div class="cursor-pointer text-xl font-semibold text-indigo-700">
-                    {{ candidacy.1.title }}
+                    {{ candidacy.1.name }}
                     {% if candidacy.0.status == "pending" %}
                     <span class="text-orange-500">(En attente)</span>
                     {% else if candidacy.0.status == "accepted" %}
@@ -16,7 +16,15 @@
             </a>
 
             <div class="my-3">
-                {{ candidacy.1.description }}
+                <p>{{ candidacy.1.email }}</p>
+            </div>
+
+            <div class="my-3">
+                <p>{{ candidacy.1.age }} ans</p>
+            </div>
+
+            <div class="my-3">
+                <p>{{ candidacy.1.description }}</p>
             </div>
         </div>
         <!-- Right -->

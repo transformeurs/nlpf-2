@@ -9,18 +9,28 @@ use axum::{
 use uuid::Uuid;
 
 use super::{
-    crud::{candidacy, candidacy_by_candidate, create_candidacy},
+    crud::{
+        accept_candidacy, candidacies_by_company, candidacy, candidacy_by_candidate,
+        candidacy_by_offer, create_candidacy, refuse_candidacy,
+    },
     models::Candidacy,
 };
-use crate::{users::models::AuthUser, utils::s3::upload_bytes_to_s3, SharedState};
+use crate::{
+    offer::models::Offer,
+    users::models::{AuthUser, Candidate},
+    utils::s3::upload_bytes_to_s3,
+    SharedState,
+};
 
 #[derive(Template)]
 #[template(path = "candidacies/create_candidacy.html")]
 pub struct CreateCandidacyTemplate {
     auth_user: Option<AuthUser>,
+    uuid_offer: String,
 }
 
 pub async fn get_create_candidacy(
+    Path(str_uuid): Path<String>,
     user: AuthUser,
 ) -> Result<CreateCandidacyTemplate, (StatusCode, String)> {
     if user.user_role != "candidate" {
@@ -31,6 +41,7 @@ pub async fn get_create_candidacy(
     }
     Ok(CreateCandidacyTemplate {
         auth_user: Some(user),
+        uuid_offer: str_uuid,
     })
 }
 
@@ -41,10 +52,13 @@ pub struct CreateCandidacySuccessTemplate {
 }
 
 pub async fn post_create_candidacy(
+    Path(str_uuid): Path<String>,
     mut multipart: Multipart,
     user: AuthUser,
     Extension(state): Extension<SharedState>,
 ) -> Result<CreateCandidacySuccessTemplate, (StatusCode, String)> {
+    let uuid_offer = Uuid::try_parse(&str_uuid);
+
     if user.user_role != "candidate" {
         return Err((
             StatusCode::BAD_REQUEST,
@@ -96,10 +110,15 @@ pub async fn post_create_candidacy(
             }
         }
     }
+    // Hardcode to status value to "pending" (every created offer should have pending status)
+    let name = "status";
+    let content = "pending";
+    form_fields.insert(name.to_string(), content.to_string());
 
     let uuid = Uuid::new_v4();
+    println!("uuid_offer = {}", str_uuid);
     let candidacy = Candidacy::from_hash_map(form_fields, uuid);
-    create_candidacy(user.email.clone(), candidacy, state)
+    create_candidacy(uuid_offer.unwrap(), user.email.clone(), candidacy, state)
         .await
         .map_err(|err| {
             tracing::error!("Error creating candidacy: {:?}", err);
@@ -116,48 +135,31 @@ pub async fn post_create_candidacy(
 
 #[derive(Template)]
 #[template(path = "candidacies/candidacies.html")]
-pub struct CandidacyTemplate {
+pub struct CandidaciesTemplate {
     auth_user: Option<AuthUser>,
-    candidacies: Option<Vec<Candidacy>>,
+    candidacies: Option<Vec<(Candidacy, Offer)>>,
 }
 
-pub async fn get_candidacy(
+pub async fn get_candidacies(
     user: AuthUser,
     Extension(state): Extension<SharedState>,
-) -> CandidacyTemplate {
-    let mut l_candidacies: Option<Vec<Candidacy>> = Some(Vec::new());
-    //if user.user_role == "candidate" {
-    //    l_candidacies = candidacies(state).await.unwrap();
+) -> CandidaciesTemplate {
+    let l_candidacies;
     if user.user_role == "company" {
+        l_candidacies = candidacies_by_company(user.email.clone(), state)
+            .await
+            .unwrap();
+    } else if user.user_role == "candidate" {
         l_candidacies = candidacy_by_candidate(user.email.clone(), state)
             .await
             .unwrap();
+    } else {
+        l_candidacies = None;
     }
 
-    CandidacyTemplate {
+    CandidaciesTemplate {
         auth_user: Some(user),
         candidacies: l_candidacies,
-    }
-}
-
-#[derive(Template)]
-#[template(path = "candidacies/candidacies.html")]
-pub struct CandidacyCandidateTemplate {
-    auth_user: Option<AuthUser>,
-    candidacies: Option<Vec<Candidacy>>,
-}
-
-pub async fn get_candidacy_candidate(
-    user: AuthUser,
-    Extension(state): Extension<SharedState>,
-) -> CandidacyCandidateTemplate {
-    let list_candidacies = candidacy_by_candidate(user.email.clone(), state)
-        .await
-        .unwrap();
-
-    CandidacyCandidateTemplate {
-        auth_user: Some(user),
-        candidacies: list_candidacies,
     }
 }
 
@@ -165,7 +167,7 @@ pub async fn get_candidacy_candidate(
 #[template(path = "candidacies/view_candidacy.html")]
 pub struct ViewCandidacyTemplate {
     auth_user: Option<AuthUser>,
-    candidacy: Option<Candidacy>,
+    candidacy: Option<(Candidacy, Candidate)>,
 }
 
 pub async fn get_view_candidacy(
@@ -187,4 +189,93 @@ pub async fn get_view_candidacy(
         auth_user: Some(user),
         candidacy: candidacy_res,
     }
+}
+
+#[derive(Template)]
+#[template(path = "candidacies/candidacies_by_offer.html")]
+pub struct ViewCandidacyByOfferTemplate {
+    auth_user: Option<AuthUser>,
+    candidacies: Option<Vec<(Candidacy, Candidate)>>,
+}
+
+pub async fn get_view_candidacy_by_offer(
+    Path(str_uuid): Path<String>,
+    user: AuthUser,
+    Extension(state): Extension<SharedState>,
+) -> ViewCandidacyByOfferTemplate {
+    println!("uuid = {}", str_uuid);
+    let uuid = Uuid::try_parse(&str_uuid);
+
+    if uuid.is_err() {
+        return ViewCandidacyByOfferTemplate {
+            auth_user: Some(user),
+            candidacies: None,
+        };
+    }
+    let l_candidacies = candidacy_by_offer(user.email.clone(), uuid.unwrap(), state)
+        .await
+        .unwrap();
+
+    ViewCandidacyByOfferTemplate {
+        auth_user: Some(user),
+        candidacies: l_candidacies,
+    }
+}
+
+#[derive(Template)]
+#[template(path = "candidacies/post_accept_candidacy.html")]
+pub struct AcceptCandidacyTemplate {
+    auth_user: Option<AuthUser>,
+}
+
+pub async fn post_accept_candidacy(
+    Path(str_uuid): Path<String>,
+    user: AuthUser,
+    Extension(state): Extension<SharedState>,
+) -> Result<AcceptCandidacyTemplate, (StatusCode, String)> {
+    println!("uuid = {}", str_uuid);
+    let uuid = Uuid::try_parse(&str_uuid);
+
+    accept_candidacy(user.email.clone(), uuid.unwrap(), state)
+        .await
+        .map_err(|err| {
+            tracing::error!("Error accepting candidacy: {:?}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error accepting candidacy".to_string(),
+            )
+        })?;
+
+    Ok(AcceptCandidacyTemplate {
+        auth_user: Some(user),
+    })
+}
+
+#[derive(Template)]
+#[template(path = "candidacies/post_refuse_candidacy.html")]
+pub struct RefuseCandidacyTemplate {
+    auth_user: Option<AuthUser>,
+}
+
+pub async fn post_refuse_candidacy(
+    Path(str_uuid): Path<String>,
+    user: AuthUser,
+    Extension(state): Extension<SharedState>,
+) -> Result<RefuseCandidacyTemplate, (StatusCode, String)> {
+    println!("uuid = {}", str_uuid);
+    let uuid = Uuid::try_parse(&str_uuid);
+
+    refuse_candidacy(user.email.clone(), uuid.unwrap(), state)
+        .await
+        .map_err(|err| {
+            tracing::error!("Error refusing candidacy: {:?}", err);
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Error refusing candidacy".to_string(),
+            )
+        })?;
+
+    Ok(RefuseCandidacyTemplate {
+        auth_user: Some(user),
+    })
 }

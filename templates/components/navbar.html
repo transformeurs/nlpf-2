@@ -21,44 +21,52 @@
                 </div>
             </a>
 
-            <!-- Navigation -->
-            <div class="hidden items-baseline space-x-4 lg:flex">
+            {% match auth_user %}
+            {% when Some(user) %}
+            <!-- Navigation Center -->
+            <div class="flex items-center space-x-4">
+                <a href="/candidacies">
+                    <div
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        {% if user.user_role == "candidate" %}
+                        Mes candidatures
+                        {% else if user.user_role == "company" %}
+                        Candidatures reçues
+                        {% endif %}
+                    </div>
+                </a>
+                {% if user.user_role == "company" %}
+                <a href="/create_offer">
+                    <div
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Poster une offre
+                    </div>
+                </a>
+                {% endif %}
+                <a href="/offers">
+                    <div
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Offres d'emploi
+                    </div>
+                </a>
+            </div>
+            {% when None %}
+            {% endmatch %}
+
+            <!-- Navigation Right (User) -->
+            <div class="flex items-center space-x-4">
                 {% match auth_user %}
                 {% when Some(user) %}
-                    {% if user.user_role == "candidate" %}
-                        <a href="/create_candidacy">
-                            <div
-                                class="cursor-pointer rounded-md border border-gray-100 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                                Candidater à une offre
-                            </div>
-                        </a>
-                        <a href="/candidacies_by_candidate">
-                            <div
-                                class="cursor-pointer rounded-md border border-gray-100 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                                Voir mes candidatures
-                            </div>
-                        </a>
-                    {% endif %}
-                    {% if user.user_role == "company" %}
-                        <a href="/create_offer">
-                            <div
-                                class="cursor-pointer rounded-md border border-gray-100 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                                Créer une offre
-                            </div>
-                        </a>
-                    {% endif %}
-                    <a href="/offers">
-                        <div
-                            class="cursor-pointer rounded-md border border-gray-100 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                            Offres Disponible
-                        </div>
-                    </a>
-                    <a href="/logout">
-                        <div
-                            class="cursor-pointer rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                            Se déconnecter
-                        </div>
-                    </a>
+                <img class="h-8 w-8 rounded-full" src={{ user.photo_url }} alt="" />
+                <p class="text-white">
+                    {{ user.username }}
+                </p>
+                <a href="/logout">
+                    <div
+                        class="cursor-pointer rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Se déconnecter
+                    </div>
+                </a>
                 {% when None %}
                 <a href="/">
                     <div

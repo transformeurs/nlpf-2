@@ -138,6 +138,8 @@ static COOKIE_NAME: &str = "SESSION";
 
 async fn validate_login(
     email: String,
+    username: String,
+    photo_url: String,
     password: String,
     hashed_password: String,
     user_role: String,
@@ -149,7 +151,15 @@ async fn validate_login(
         // User successfully authenticated
         let mut session = Session::new();
         session
-            .insert("user", AuthUser { user_role, email })
+            .insert(
+                "user",
+                AuthUser {
+                    user_role,
+                    username,
+                    email,
+                    photo_url,
+                },
+            )
             .unwrap();
 
         let cookie = store.store_session(session).await.unwrap().unwrap();
@@ -160,13 +170,10 @@ async fn validate_login(
         let mut headers = HeaderMap::new();
         headers.insert(SET_COOKIE, cookie.parse().unwrap());
 
-        Ok((headers, Redirect::to("/infos")))
+        Ok((headers, Redirect::to("/offers")).into_response())
     } else {
         // User not authenticated
-        Err((
-            StatusCode::UNAUTHORIZED,
-            "Invalid email or password".to_string(),
-        ))
+        Ok(Redirect::to("/?error=true").into_response())
     }
 }
 
@@ -190,6 +197,8 @@ pub async fn post_login_page(
         {
             return validate_login(
                 candidate.email,
+                candidate.name,
+                candidate.photo_url,
                 input.password,
                 candidate.password,
                 input.user_role,
@@ -210,6 +219,8 @@ pub async fn post_login_page(
         {
             return validate_login(
                 company.email,
+                company.name,
+                company.photo_url,
                 input.password,
                 company.password,
                 input.user_role,
@@ -295,17 +306,4 @@ where
 
         Ok(user)
     }
-}
-
-#[derive(Template)]
-#[template(path = "users_infos.html")]
-pub struct InfosTemplate {
-    auth_user: Option<AuthUser>,
-}
-
-/// GET handler for showing infos
-pub async fn get_infos_page(user: AuthUser) -> Result<impl IntoResponse, (StatusCode, String)> {
-    Ok(InfosTemplate {
-        auth_user: Some(user),
-    })
 }
