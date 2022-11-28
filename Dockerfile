@@ -15,18 +15,21 @@ RUN cargo build --release
 
 FROM debian:11-slim AS runtime
 WORKDIR /app
+
 COPY --from=builder /app/target/release/nlpf-2 nlpf-2
 COPY settings settings
 COPY templates templates
 
 RUN apt-get update -y \
-    && apt-get install -y --no-install-recommends openssl ca-certificates curl \
+    && apt-get install -y --no-install-recommends ca-certificates \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd appuser \
     && useradd -g appuser appuser \
-    && chown -R $APP_USER:$APP_USER /app
+    && chown -R appuser:appuser /app
 
-ENTRYPOINT ["./nlpf-2"]
+USER appuser
+
+CMD ["./nlpf-2"]
