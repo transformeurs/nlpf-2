@@ -61,9 +61,8 @@
                             <div class="flex flex-col space-y-2 mt-2">
                                 {% for answer in question.answers %}
                                 <div>
-                                    <input type="checkbox"
-                                        name="questionnaire;{{ q.uuid }};{{ question.uuid }};{{ answer.uuid }}"
-                                        value="selected">
+                                    <input type="radio" name="questionnaire;{{ question.uuid }}"
+                                        value="{{ answer.uuid }}">
                                     <label> {{ answer.answer }}</label>
                                 </div>
                                 {% endfor %}

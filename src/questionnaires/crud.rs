@@ -352,34 +352,29 @@ pub async fn get_questionnaire_by_id(
 }
 
 /// Compute questionnaire score
-/// TODO: Unfinished
 pub async fn compute_questionnaire_score(
     input: Vec<String>,
     state: SharedState,
 ) -> Result<u64, neo4rs::Error> {
     tracing::info!("Computing questionnaire score");
 
-    for answer in input {
-        tracing::info!("Answer: {answer}");
-        let uuids: Vec<&str> = answer.split(';').skip(1).collect();
+    let mut questions: u64 = 0;
+    let mut valid_answers: u64 = 0;
 
-        let questionnaire_id = uuids[0];
-        let question_id = uuids[1];
-        let answer_id = uuids[2];
+    for answer_id in input {
+        tracing::info!("Answer id: {}", answer_id);
+
+        questions += 1;
 
         let mut result = state
             .graph
             .execute(
                 query(
                     r#"
-                MATCH (q:Questionnaire {uuid:$questionnaire_id})
-                MATCH (q)-[HAS_QUESTION]->(c:Question {uuid:$question_id})
-                MATCH (c)-[HAS_ANSWER]->(a:Answer {uuid:$answer_id})
+                MATCH (a:Answer {uuid:$answer_id})
                 RETURN a
             "#,
                 )
-                .param("questionnaire_id", questionnaire_id.to_string())
-                .param("question_id", question_id.to_string())
                 .param("answer_id", answer_id.to_string()),
             )
             .await?;
@@ -394,12 +389,13 @@ pub async fn compute_questionnaire_score(
             }
 
             if is_valid {
-                // TODO: Add to a total score
-                return Ok(1);
+                valid_answers += 1;
             }
         }
     }
 
-    // TODO Finish function
-    Ok(42)
+    if questions == 0 {
+        return Ok(0);
+    }
+    Ok(((valid_answers as f64 / questions as f64) * 100f64) as u64)
 }

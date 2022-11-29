@@ -90,7 +90,7 @@ pub async fn post_create_candidacy(
     }
 
     let mut form_fields = HashMap::new();
-    let mut questionnaire_fields = Vec::new();
+    let mut mcq_answers = Vec::new();
 
     while let Some(field) = multipart.next_field().await.unwrap() {
         if let Some(name) = field.name() {
@@ -130,8 +130,8 @@ pub async fn post_create_candidacy(
             }
             // Handling the questionnaire fields
             else if name.starts_with("questionnaire") {
-                let name = name.to_string();
-                questionnaire_fields.push(name);
+                let value = field.text().await.unwrap();
+                mcq_answers.push(value);
             }
             // Other fields
             else {
@@ -143,7 +143,7 @@ pub async fn post_create_candidacy(
     }
 
     // Compute the questionnaire score
-    let questionnaire_score = compute_questionnaire_score(questionnaire_fields, state.clone())
+    let questionnaire_score = compute_questionnaire_score(mcq_answers, state.clone())
         .await
         .unwrap();
     form_fields.insert(
