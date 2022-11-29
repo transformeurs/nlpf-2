@@ -14,7 +14,10 @@ use super::{
 };
 use crate::{
     questionnaires::{
-        crud::{delete_questionnaire_by_id, get_questionnaire_by_id},
+        crud::{
+            delete_questionnaire_by_id, get_questionnaire_by_id,
+            get_questionnaires_by_company_email,
+        },
         models::Questionnaire,
     },
     users::models::{AuthUser, Company},
@@ -66,17 +69,27 @@ pub async fn get_offer_company(
 #[template(path = "offers/create_offer.html")]
 pub struct CreateOfferTemplate {
     auth_user: Option<AuthUser>,
+    questionnaires: Option<Vec<Questionnaire>>,
 }
 
-pub async fn get_create_offer(user: AuthUser) -> Result<CreateOfferTemplate, (StatusCode, String)> {
+pub async fn get_create_offer(
+    user: AuthUser,
+    Extension(state): Extension<SharedState>,
+) -> Result<CreateOfferTemplate, (StatusCode, String)> {
     if user.user_role != "company" {
         return Err((
             StatusCode::BAD_REQUEST,
             "Invalid role : you must be a company to create an offer".to_string(),
         ));
     }
+
+    let questionnaires = get_questionnaires_by_company_email(user.email.clone(), state)
+        .await
+        .unwrap();
+
     Ok(CreateOfferTemplate {
         auth_user: Some(user),
+        questionnaires: Some(questionnaires),
     })
 }
 
@@ -106,7 +119,6 @@ pub async fn post_create_offer(
 
     let uuid = Uuid::new_v4();
     let skills_str: Vec<&str> = form_fields.get("skills").unwrap().split(',').collect();
-    // convert Vec<&str> to Vec<String>
     let skills: Vec<String> = skills_str.iter().map(|&s| s.to_string()).collect();
 
     let offer = Offer::from_hash_map(form_fields, skills, uuid);
@@ -146,13 +158,31 @@ pub async fn get_view_offer(
             questionnaire: None,
         };
     }
+
     let offer_id = uuid.unwrap();
     let crud_res = offer_with_company(offer_id, state.clone()).await.unwrap();
-    let questionnaire = get_questionnaire_by_id(offer_id.to_string(), state.clone()).await;
+    if let Some(o) = crud_res {
+        if let Some(q) = o.0.questionnaire_id {
+            let questionnaire = get_questionnaire_by_id(q.to_string(), state.clone())
+                .await
+                .unwrap();
+            return ViewOfferTemplate {
+                auth_user: Some(user),
+                offer_with_company: Some(o),
+                questionnaire,
+            };
+        }
+
+        return ViewOfferTemplate {
+            auth_user: Some(user),
+            offer_with_company: Some(o),
+            questionnaire: None,
+        };
+    }
 
     ViewOfferTemplate {
         auth_user: Some(user),
-        offer_with_company: crud_res,
-        questionnaire: questionnaire.unwrap(),
+        offer_with_company: None,
+        questionnaire: None,
     }
 }

@@ -26,7 +26,8 @@ pub async fn create_offer(
                 location : $location,
                 salary : $salary,
                 job_duration : $job_duration,
-                job_start : $job_start
+                job_start : $job_start,
+                questionnaire_id : $questionnaire_id
             })
             CREATE (c)-[:POSTED]->(o)
             RETURN o
@@ -41,7 +42,13 @@ pub async fn create_offer(
             .param("salary", offer.salary)
             .param("job_duration", offer.job_duration.clone())
             .param("job_start", offer.job_start.clone())
-            .param("email", company_email.clone()),
+            .param("email", company_email.clone())
+            .param(
+                "questionnaire_id",
+                offer
+                    .questionnaire_id
+                    .map_or("0".to_string(), |id| id.to_string()),
+            ),
         )
         .await?;
 

@@ -35,26 +35,20 @@
                         {% endif %}
                     </div>
                 </a>
-                {% if user.user_role == "company" %}
-                <a href="/create_offer">
-                    <div
-                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                        Poster une offre
-                    </div>
-                </a>
-                <a href="/questionnaires">
-                    <div
-                            class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
-                        Questionnaires
-                    </div>
-                </a>
-                {% endif %}
                 <a href="/offers">
                     <div
                         class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
                         Offres d'emploi
                     </div>
                 </a>
+                {% if user.user_role == "company" %}
+                <a href="/questionnaires">
+                    <div
+                        class="cursor-pointer rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-indigo-600 hover:text-white">
+                        Questionnaires
+                    </div>
+                </a>
+                {% endif %}
             </div>
             {% when None %}
             {% endmatch %}

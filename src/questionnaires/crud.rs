@@ -1,11 +1,10 @@
 use neo4rs::{query, Node};
 
+use super::models::Questionnaire;
 use crate::{
     questionnaires::models::{QuestionnaireQuestion, QuestionnaireQuestionAnswer},
     SharedState,
 };
-
-use super::models::Questionnaire;
 
 /// Create a new candidate in the database and return it
 pub async fn create_questionnaire(
@@ -193,7 +192,7 @@ pub async fn get_questionnaires_by_company_email(
             query(
                 r#"
             MATCH (c:Company {email:$email})
-            MATCH (c)-[POSTED]-(q:Questionnaire) 
+            MATCH (c)-[POSTED]-(q:Questionnaire)
             RETURN q
         "#,
             )
@@ -281,7 +280,7 @@ pub async fn get_questionnaire_by_id(
                 query(
                     r#"
                 MATCH (q:Questionnaire {uuid:$uuid})
-                MATCH (q)-[HAS_QUESTION]-(c:Question) 
+                MATCH (q)-[HAS_QUESTION]-(c:Question)
                 RETURN c
             "#,
                 )
@@ -306,7 +305,7 @@ pub async fn get_questionnaire_by_id(
                     query(
                         r#"
                     MATCH (q:Question {uuid:$uuid})
-                    MATCH (q)-[HAS_ANSWER]-(c:Answer) 
+                    MATCH (q)-[HAS_ANSWER]-(c:Answer)
                     RETURN c
                 "#,
                     )

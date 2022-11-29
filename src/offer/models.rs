@@ -14,6 +14,7 @@ pub struct Offer {
     pub salary: i64,
     pub job_duration: String,
     pub job_start: String,
+    pub questionnaire_id: Option<uuid::Uuid>,
 }
 
 impl Offer {
@@ -33,6 +34,13 @@ impl Offer {
         let job_duration = map.get("job_duration").unwrap().clone();
         let job_start = map.get("job_start").unwrap().clone();
 
+        let questionnaire_id = map.get("questionnaire").unwrap().clone();
+        let questionnaire_id = if questionnaire_id == "0" {
+            None
+        } else {
+            Some(uuid::Uuid::parse_str(&questionnaire_id).unwrap())
+        };
+
         Offer {
             title,
             uuid,
@@ -43,6 +51,7 @@ impl Offer {
             salary,
             job_duration,
             job_start,
+            questionnaire_id,
         }
     }
 
@@ -58,6 +67,13 @@ impl Offer {
         let job_duration: String = node.get("job_duration").unwrap();
         let job_start: String = node.get("job_start").unwrap();
 
+        let questionnaire_id: String = node.get("questionnaire_id").unwrap();
+        let questionnaire_id = if questionnaire_id == "0" {
+            None
+        } else {
+            Some(uuid::Uuid::parse_str(&questionnaire_id).unwrap())
+        };
+
         Offer {
             title,
             uuid,
@@ -68,6 +84,7 @@ impl Offer {
             salary,
             job_duration,
             job_start,
+            questionnaire_id,
         }
     }
 }

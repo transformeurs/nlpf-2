@@ -8,20 +8,19 @@ use axum::{
     Extension,
 };
 
+use super::crud::{delete_questionnaire_by_id, get_questionnaires_by_company_email};
 use crate::{
     questionnaires::{crud::create_questionnaire, models::Questionnaire},
     users::models::AuthUser,
     SharedState,
 };
 
-use super::crud::{delete_questionnaire_by_id, get_questionnaires_by_company_email};
-
 // ***************************************
 // GET /questionnaires
 // ***************************************
 
 #[derive(Template)]
-#[template(path = "questionnaires.html")]
+#[template(path = "questionnaires/questionnaires.html")]
 pub struct QuestionnairesTemplate {
     auth_user: Option<AuthUser>,
     questionnaires: Vec<Questionnaire>,
@@ -45,12 +44,6 @@ pub async fn get_questionnaires_page(
 // ***************************************
 // POST /questionnaires
 // ***************************************
-
-#[derive(Template)]
-#[template(path = "signup/success.html")]
-pub struct SignupSuccessTemplate {
-    auth_user: Option<AuthUser>,
-}
 
 /// POST handler for creating questionnaire
 /// First, we extract the multipart form data from the request and create a
@@ -104,7 +97,7 @@ pub async fn post_questionnaire_page(
 // ***************************************
 
 #[derive(Template)]
-#[template(path = "create_questionnaire.html")]
+#[template(path = "questionnaires/create_questionnaire.html")]
 pub struct CreateQuestionnaireTemplate {
     auth_user: Option<AuthUser>,
 }
@@ -125,9 +118,8 @@ pub async fn get_create_questionnaire_page(
 /// DELETE handler for deleting a questionnaire
 pub async fn delete_questionnaire_page(
     Path(questionnaire_id): Path<String>,
-    user: AuthUser,
     Extension(state): Extension<SharedState>,
-) -> Result<SignupSuccessTemplate, (StatusCode, String)> {
+) -> Result<(), (StatusCode, String)> {
     delete_questionnaire_by_id(questionnaire_id, state)
         .await
         .map_err(|err| {
@@ -138,6 +130,5 @@ pub async fn delete_questionnaire_page(
             )
         })?;
 
-    // Return success page!
-    Ok(SignupSuccessTemplate { auth_user: None })
+    Ok(())
 }

@@ -1,6 +1,7 @@
+use std::{collections::HashMap, num};
+
 use bcrypt::DEFAULT_COST;
 use neo4rs::Node;
-use std::{collections::HashMap, num};
 
 pub struct QuestionnaireQuestionAnswer {
     pub uuid: String,
