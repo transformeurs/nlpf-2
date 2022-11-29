@@ -135,6 +135,9 @@ Offre introuvable
         {% endmatch %}
     </div>
 
+    {% match auth_user %}
+    {% when Some(user) %}
+    {% if user.user_role == "company" %}
     <!-- Questionnaire -->
     <div class="col-span-6 rounded-lg bg-white p-8 shadow">
         {% match questionnaire %}
@@ -148,8 +151,15 @@ Offre introuvable
                 <div class="text-lg font-semibold">{{ question.question }}</div>
                 <div class="flex space-x-2 mt-2">
                     {% for answer in question.answers %}
-                    <div class="font-semibold rounded-lg border border-gray-400 hover:bg-gray-100 px-2 py-1">{{
-                        answer.answer }}</div>
+                    {% if answer.is_valid %}
+                    <div class="font-semibold rounded-lg bg-green-600 text-white px-2 py-1">
+                        {{ answer.answer }}
+                    </div>
+                    {% else %}
+                    <div class="font-semibold rounded-lg bg-red-600 text-white px-2 py-1">
+                        {{ answer.answer }}
+                    </div>
+                    {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -161,6 +171,9 @@ Offre introuvable
         </div>
         {% endmatch %}
     </div>
+    {% endif %}
+    {% when None %}
+    {% endmatch %}
 </div>
 
 

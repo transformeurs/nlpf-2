@@ -53,7 +53,7 @@
       answerCheckbox.setAttribute("name", "validity-" + questionId + "-" + answerIndex);
       answerCheckbox.setAttribute("class", "ml-2");
       answerDiv.appendChild(answerCheckbox);
-      
+
       answerIndex++;
       questionDiv.appendChild(answerDiv);
     };
@@ -71,44 +71,29 @@
 <div class="flex justify-center">
   <div class="w-full rounded-lg bg-white shadow lg:w-1/2">
     <div class="px-4 py-8 sm:px-10">
-      <form
-        name="add-questionnaire"
-        action="/questionnaires"
-        method="post"
-        enctype="multipart/form-data"
-        autocomplete="on"
-        class="space-y-12"
-      >
+      <form name="add-questionnaire" action="/questionnaires" method="post" enctype="multipart/form-data"
+        autocomplete="on" class="space-y-12">
         <div class="relative mt-1 rounded-md shadow-sm">
-          <input
-            type="text"
-            id="name"
-            name="name"
-            placeholder="Nom du questionnaire"
+          <input type="text" id="name" name="name" placeholder="Nom du questionnaire"
             class="block bg-white w-full rounded-md shadow-sm sm:text-sm border-gray-300 text-black focus:border-blue-500 focus:ring-blue-500"
-            required
-          />
+            required />
         </div>
 
         <div id="questions" class="space-y-4"></div>
 
         <div>
           <div class="flex justify-end space-x-1">
-            <button
-            type="button"
+            <button type="button"
               class="mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 px-4 py-2 text-sm"
-              onclick="addQuestion()"
-              >
+              onclick="addQuestion()">
               Ajouter une question
             </button>
           </div>
         </div>
 
         <div>
-          <button
-            type="submit"
-            class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm"
-          >
+          <button type="submit"
+            class="w-full mt-5 inline-flex items-center justify-center rounded border font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 px-4 py-2 text-sm">
             Créer
           </button>
         </div>
@@ -116,5 +101,4 @@
     </div>
   </div>
 </div>
-
 {% endblock %}

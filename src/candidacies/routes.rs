@@ -16,7 +16,11 @@ use super::{
     models::Candidacy,
 };
 use crate::{
-    offer::models::Offer,
+    offer::{crud::offer_by_uuid, models::Offer},
+    questionnaires::{
+        crud::{compute_questionnaire_score, get_questionnaire_by_id},
+        models::Questionnaire,
+    },
     users::models::{AuthUser, Candidate},
     utils::s3::upload_bytes_to_s3,
     SharedState,
@@ -27,11 +31,13 @@ use crate::{
 pub struct CreateCandidacyTemplate {
     auth_user: Option<AuthUser>,
     uuid_offer: String,
+    questionnaire: Option<Questionnaire>,
 }
 
 pub async fn get_create_candidacy(
     Path(str_uuid): Path<String>,
     user: AuthUser,
+    Extension(state): Extension<SharedState>,
 ) -> Result<CreateCandidacyTemplate, (StatusCode, String)> {
     if user.user_role != "candidate" {
         return Err((
@@ -39,9 +45,26 @@ pub async fn get_create_candidacy(
             "Invalid role : you must be a candidate to create an candidacy".to_string(),
         ));
     }
+
+    let uuid_offer = Uuid::parse_str(&str_uuid).unwrap();
+    let offer = offer_by_uuid(uuid_offer, state.clone()).await.unwrap();
+    let questionnaire = if let Some(offer) = offer {
+        if let Some(qid) = offer.questionnaire_id {
+            let questionnaire = get_questionnaire_by_id(qid.to_string(), state)
+                .await
+                .unwrap();
+            questionnaire
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
     Ok(CreateCandidacyTemplate {
         auth_user: Some(user),
         uuid_offer: str_uuid,
+        questionnaire,
     })
 }
 
@@ -65,7 +88,10 @@ pub async fn post_create_candidacy(
             "Invalid role : you must be a candidate to create a candidacy".to_string(),
         ));
     }
+
     let mut form_fields = HashMap::new();
+    let mut questionnaire_fields = Vec::new();
+
     while let Some(field) = multipart.next_field().await.unwrap() {
         if let Some(name) = field.name() {
             // Handling the file upload to generate an URL from S3
@@ -102,6 +128,11 @@ pub async fn post_create_candidacy(
                 let name = String::from("resume_url");
                 form_fields.insert(name, uri);
             }
+            // Handling the questionnaire fields
+            else if name.starts_with("questionnaire") {
+                let name = name.to_string();
+                questionnaire_fields.push(name);
+            }
             // Other fields
             else {
                 let name = field.name().unwrap().to_string();
@@ -110,6 +141,16 @@ pub async fn post_create_candidacy(
             }
         }
     }
+
+    // Compute the questionnaire score
+    let questionnaire_score = compute_questionnaire_score(questionnaire_fields, state.clone())
+        .await
+        .unwrap();
+    form_fields.insert(
+        "questionnaire_score".to_string(),
+        questionnaire_score.to_string(),
+    );
+
     // Hardcode to status value to "pending" (every created offer should have pending status)
     let name = "status";
     let content = "pending";

@@ -14,10 +14,7 @@ use super::{
 };
 use crate::{
     questionnaires::{
-        crud::{
-            delete_questionnaire_by_id, get_questionnaire_by_id,
-            get_questionnaires_by_company_email,
-        },
+        crud::{get_questionnaire_by_id, get_questionnaires_by_company_email},
         models::Questionnaire,
     },
     users::models::{AuthUser, Company},

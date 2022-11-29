@@ -350,3 +350,56 @@ pub async fn get_questionnaire_by_id(
 
     Ok(None)
 }
+
+/// Compute questionnaire score
+/// TODO: Unfinished
+pub async fn compute_questionnaire_score(
+    input: Vec<String>,
+    state: SharedState,
+) -> Result<u64, neo4rs::Error> {
+    tracing::info!("Computing questionnaire score");
+
+    for answer in input {
+        tracing::info!("Answer: {answer}");
+        let uuids: Vec<&str> = answer.split(';').skip(1).collect();
+
+        let questionnaire_id = uuids[0];
+        let question_id = uuids[1];
+        let answer_id = uuids[2];
+
+        let mut result = state
+            .graph
+            .execute(
+                query(
+                    r#"
+                MATCH (q:Questionnaire {uuid:$questionnaire_id})
+                MATCH (q)-[HAS_QUESTION]->(c:Question {uuid:$question_id})
+                MATCH (c)-[HAS_ANSWER]->(a:Answer {uuid:$answer_id})
+                RETURN a
+            "#,
+                )
+                .param("questionnaire_id", questionnaire_id.to_string())
+                .param("question_id", question_id.to_string())
+                .param("answer_id", answer_id.to_string()),
+            )
+            .await?;
+
+        while let Ok(Some(row)) = result.next().await {
+            let node: Node = row.get("a").unwrap();
+            let is_valid_answer: String = node.get("is_valid").unwrap();
+
+            let mut is_valid: bool = false;
+            if is_valid_answer == "true" {
+                is_valid = true;
+            }
+
+            if is_valid {
+                // TODO: Add to a total score
+                return Ok(1);
+            }
+        }
+    }
+
+    // TODO Finish function
+    Ok(42)
+}

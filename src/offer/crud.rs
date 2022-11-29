@@ -161,3 +161,31 @@ pub async fn offer_with_company(
 
     Ok(None)
 }
+
+pub async fn offer_by_uuid(
+    uuid_str: uuid::Uuid,
+    state: SharedState,
+) -> Result<Option<Offer>, neo4rs::Error> {
+    let uuid = uuid_str.to_string();
+    tracing::info!("Getting offer by uuid: {}", uuid);
+
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (o:Offer {uuid: $uuid})
+            RETURN o
+        "#,
+            )
+            .param("uuid", uuid),
+        )
+        .await?;
+
+    if let Ok(Some(row)) = result.next().await {
+        let offer_node: Node = row.get("o").unwrap();
+        return Ok(Some(Offer::from_node(offer_node)));
+    }
+
+    Ok(None)
+}
