@@ -20,7 +20,7 @@ describe('candidate', () => {
     cy.get("#description").type("Coach Agile en reconversion");
     cy.get("#fileinput").selectFile("cypress/e2e/2-candidate/robin_photo.jpg");
 
-    cy.wait(1000);
+    cy.wait(3000);
 
     // // Click on the "S'inscrire" button
     cy.get(":nth-child(8) > .w-full").click();

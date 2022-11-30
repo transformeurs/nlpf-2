@@ -11,6 +11,7 @@ describe("candidacy", () => {
   })
 
   it("check candidacies", () => {
+    cy.wait(1500);
     cy.get("[href='/candidacies']").click();
     cy.wait(5000);
     cy.get(".space-y-1 > .w-full").first().click();

@@ -38,9 +38,9 @@ describe("questionnaire", () => {
     cy.get(":nth-child(2) > .flex > .w-64").click(); // Click on the "Ajouter une option" button
     cy.get("#answer-1-3").type("2027");
     cy.get("#validity-1-2").check();
-    cy.wait(3000);
+    cy.wait(6000);
     cy.get(".space-y-12 > :nth-child(4) > .w-full").click();
-    cy.wait(5000);
+    cy.wait(2000);
     cy.get(":nth-child(1) > .mt-4 > summary").click();
   })
 })

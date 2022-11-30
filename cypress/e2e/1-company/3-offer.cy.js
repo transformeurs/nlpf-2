@@ -14,7 +14,7 @@ describe("offer", () => {
     cy.wait(2000);
     cy.get(".relative > a > .border").click();
     cy.wait(2000);
-    
+
     cy.get(".space-y-6 > :nth-child(1) > .block").type("Architecte Data");
     cy.get(":nth-child(2) > .block").type("Verticaux : Retail, Média, Industrie, Marketing\nExpertises : Problématiques Data, Processus de développement logiciel, Intégration applicative");
     cy.get(":nth-child(3) > .block").type("Programmation, Data, Architecture");
@@ -23,8 +23,9 @@ describe("offer", () => {
     cy.get(":nth-child(6) > .block").type("CDI");
     cy.get(":nth-child(7) > .block").type("Février 2023");
     cy.get(":nth-child(9) > .block").select(1);
+    cy.wait(3000);
     cy.get(".w-64").click();
-    cy.wait(2000);
+    cy.wait(1000);
     cy.get("[href='/offers']").click();
     cy.wait(5000);
 
