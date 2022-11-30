@@ -44,6 +44,18 @@
                 </p>
             </div>
 
+            {% match auth_user %}
+            {% when Some(user) %}
+            {% if user.user_role == "company" %}
+            <div class="relative mt-1 rounded-md">
+                <p>
+                    Score du candidat : {{ val.0.questionnaire_score }} %
+                </p>
+            </div>
+            {% endif %}
+            {% when None %}
+            {% endmatch %}
+
             <div class="relative mt-1 rounded-md">
                 <p>Message supplémentaire : </p>
                 <p>{{ val.0.custom_field }}</p>

@@ -134,14 +134,55 @@ Offre introuvable
         {% when None %}
         {% endmatch %}
     </div>
+
+    {% match auth_user %}
+    {% when Some(user) %}
+    {% if user.user_role == "company" %}
+    <!-- Questionnaire -->
+    <div class="col-span-6 rounded-lg bg-white p-8 shadow">
+        {% match questionnaire %}
+        {% when Some(q) %}
+        <h2 class="text-2xl font-bold">
+            {{ q.name }}
+        </h2>
+        <div class="space-y-4 mt-2">
+            {% for question in q.questions %}
+            <div>
+                <div class="text-lg font-semibold">{{ question.question }}</div>
+                <div class="flex space-x-2 mt-2">
+                    {% for answer in question.answers %}
+                    {% if answer.is_valid %}
+                    <div class="font-semibold rounded-lg bg-green-600 text-white px-2 py-1">
+                        {{ answer.answer }}
+                    </div>
+                    {% else %}
+                    <div class="font-semibold rounded-lg bg-red-600 text-white px-2 py-1">
+                        {{ answer.answer }}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% when None %}
+        <div>
+            Aucun questionnaire associé à cette offre.
+        </div>
+        {% endmatch %}
+    </div>
+    {% endif %}
+    {% when None %}
+    {% endmatch %}
 </div>
+
 
 {% when None %}
 <div class="col-span-5 rounded-lg bg-white shadow lg:col-span-2">
     <div class="px-4 py-8 sm:px-10">
         <div class="mt-6">
             <p>
-                Offer not found
+                Offre non trouvée.
             </p>
         </div>
     </div>

@@ -26,7 +26,8 @@ pub async fn create_candidacy(
                     status: $status,
                     cover_letter_url: $cover_letter_url,
                     resume_url: $resume_url,
-                    custom_field: $custom_field
+                    custom_field: $custom_field,
+                    questionnaire_score: $questionnaire_score
                 }]->(o)
                 RETURN r
         "#,
@@ -37,6 +38,7 @@ pub async fn create_candidacy(
             .param("cover_letter_url", candidacy.cover_letter_url.clone())
             .param("resume_url", candidacy.resume_url.clone())
             .param("custom_field", candidacy.custom_field.clone())
+            .param("questionnaire_score", candidacy.questionnaire_score)
             .param("uuid_offer", uuid_offer.to_string()),
         )
         .await?;

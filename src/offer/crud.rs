@@ -26,7 +26,8 @@ pub async fn create_offer(
                 location : $location,
                 salary : $salary,
                 job_duration : $job_duration,
-                job_start : $job_start
+                job_start : $job_start,
+                questionnaire_id : $questionnaire_id
             })
             CREATE (c)-[:POSTED]->(o)
             RETURN o
@@ -41,7 +42,13 @@ pub async fn create_offer(
             .param("salary", offer.salary)
             .param("job_duration", offer.job_duration.clone())
             .param("job_start", offer.job_start.clone())
-            .param("email", company_email.clone()),
+            .param("email", company_email.clone())
+            .param(
+                "questionnaire_id",
+                offer
+                    .questionnaire_id
+                    .map_or("0".to_string(), |id| id.to_string()),
+            ),
         )
         .await?;
 
@@ -150,6 +157,34 @@ pub async fn offer_with_company(
             Offer::from_node(offer_node),
             Company::from_node(company_node),
         )));
+    }
+
+    Ok(None)
+}
+
+pub async fn offer_by_uuid(
+    uuid_str: uuid::Uuid,
+    state: SharedState,
+) -> Result<Option<Offer>, neo4rs::Error> {
+    let uuid = uuid_str.to_string();
+    tracing::info!("Getting offer by uuid: {}", uuid);
+
+    let mut result = state
+        .graph
+        .execute(
+            query(
+                r#"
+            MATCH (o:Offer {uuid: $uuid})
+            RETURN o
+        "#,
+            )
+            .param("uuid", uuid),
+        )
+        .await?;
+
+    if let Ok(Some(row)) = result.next().await {
+        let offer_node: Node = row.get("o").unwrap();
+        return Ok(Some(Offer::from_node(offer_node)));
     }
 
     Ok(None)

@@ -15,6 +15,7 @@ pub struct Candidacy {
     pub cover_letter_url: String,
     pub resume_url: String,
     pub custom_field: String,
+    pub questionnaire_score: i64,
 }
 
 impl Candidacy {
@@ -25,6 +26,11 @@ impl Candidacy {
         let cover_letter_url = map.get("cover_letter_url").unwrap().clone();
         let resume_url = map.get("resume_url").unwrap().clone();
         let custom_field = map.get("custom_field").unwrap().clone();
+        let questionnaire_score = map
+            .get("questionnaire_score")
+            .unwrap()
+            .parse::<i64>()
+            .unwrap();
 
         Candidacy {
             uuid,
@@ -32,6 +38,7 @@ impl Candidacy {
             cover_letter_url,
             resume_url,
             custom_field,
+            questionnaire_score,
         }
     }
 
@@ -42,6 +49,7 @@ impl Candidacy {
         let cover_letter_url: String = relation.get("cover_letter_url").unwrap();
         let resume_url: String = relation.get("resume_url").unwrap();
         let custom_field: String = relation.get("custom_field").unwrap();
+        let questionnaire_score: i64 = relation.get("questionnaire_score").unwrap();
 
         Candidacy {
             uuid,
@@ -49,6 +57,7 @@ impl Candidacy {
             cover_letter_url,
             resume_url,
             custom_field,
+            questionnaire_score,
         }
     }
 }
