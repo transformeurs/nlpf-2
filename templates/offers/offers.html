@@ -10,12 +10,18 @@
     <h1 class="text-3xl font-bold m-5 text-white">
         Offres d'emploi
     </h1>
+    {% match auth_user %}
+    {% when Some(user) %}
+    {% if user.user_role == "company" %}
     <a href="/create_offer">
         <button
             class="border border-gray-300  bg-indigo-700 hover:bg-indigo-500 rounded px-4 py-2 text-white absolute right-6 top-0">
             Poster une offre
         </button>
     </a>
+    {% endif %}
+    {% when None %}
+    {% endmatch %}
 </div>
 <ul class="flex flex-col space-y-4">
     {% match offers %}
