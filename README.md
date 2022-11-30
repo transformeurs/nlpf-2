@@ -5,9 +5,9 @@
 - Rust (Axum & Askama)
 - Neo4j
 - S3 (MinIO)
+- Redis
 - Docker
 - GitHub Actions
-- ELK
 
 ## Get started
 
