@@ -57,10 +57,7 @@ pub async fn create_questionnaire(
         .await?;
 
     // Check if created, and log the name
-    while let Ok(Some(row)) = result_relationship_questionnaire_company.next().await {
-        let node: Node = row.get("q").unwrap();
-        let name: String = node.get("name").unwrap();
-        let node: Node = row.get("c").unwrap();
+    while let Ok(Some(_)) = result_relationship_questionnaire_company.next().await {
         tracing::info!("Created relation between {} and ?", questionnaire_id);
     }
 
@@ -110,11 +107,7 @@ pub async fn create_questionnaire(
             .await?;
 
         // Check if created, and log the name
-        while let Ok(Some(row)) = result_question.next().await {
-            let node: Node = row.get("q").unwrap();
-            let name: String = node.get("name").unwrap();
-            let node: Node = row.get("c").unwrap();
-            let question: String = node.get("question").unwrap();
+        while let Ok(Some(_)) = result_question.next().await {
             tracing::info!("Created relation between {questionnaire_id} and {question_id}");
         }
 
@@ -166,11 +159,7 @@ pub async fn create_questionnaire(
                 .await?;
 
             // Check if created, and log the name
-            while let Ok(Some(row)) = result_answer.next().await {
-                let node: Node = row.get("q").unwrap();
-                let question: String = node.get("question").unwrap();
-                let node: Node = row.get("c").unwrap();
-                let answer: String = node.get("answer").unwrap();
+            while let Ok(Some(_)) = result_answer.next().await {
                 tracing::info!("Created relation between {question_id} and {answer_id}");
             }
         }
@@ -263,7 +252,7 @@ pub async fn get_questionnaire_by_id(
         )
         .await?;
 
-    while let Ok(Some(row)) = result.next().await {
+    if let Ok(Some(row)) = result.next().await {
         let node: Node = row.get("q").unwrap();
         let name: String = node.get("name").unwrap();
         tracing::info!("Found questionnaire: {name} Get questions by questionnaire id");

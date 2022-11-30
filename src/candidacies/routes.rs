@@ -50,10 +50,9 @@ pub async fn get_create_candidacy(
     let offer = offer_by_uuid(uuid_offer, state.clone()).await.unwrap();
     let questionnaire = if let Some(offer) = offer {
         if let Some(qid) = offer.questionnaire_id {
-            let questionnaire = get_questionnaire_by_id(qid.to_string(), state)
+            get_questionnaire_by_id(qid.to_string(), state)
                 .await
-                .unwrap();
-            questionnaire
+                .unwrap()
         } else {
             None
         }

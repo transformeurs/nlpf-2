@@ -28,7 +28,7 @@ impl Questionnaire {
         // Get the questions
         for (key, value) in map.iter() {
             if key.starts_with("question") {
-                let question_id: i32 = key.split("-").collect::<Vec<&str>>()[1].parse().unwrap();
+                let question_id: i32 = key.split('-').collect::<Vec<&str>>()[1].parse().unwrap();
                 let mut question = QuestionnaireQuestion {
                     uuid: String::new(),
                     question: value.clone(),
@@ -40,7 +40,7 @@ impl Questionnaire {
                     let start_with = format!("answer-{}", question_id);
                     if key.starts_with(start_with.as_str()) {
                         let answer_id: i32 =
-                            key.split("-").collect::<Vec<&str>>()[2].parse().unwrap();
+                            key.split('-').collect::<Vec<&str>>()[2].parse().unwrap();
 
                         // Get the answer validity
                         let mut answer_validity_bool: bool = false;
