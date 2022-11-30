@@ -12,6 +12,7 @@ pub struct Settings {
     pub uri: SocketAddr,
     pub s3: S3Settings,
     pub neo4j: Neo4jSettings,
+    pub redis: RedisSettings,
 }
 
 /// Retrieve the settings from the `./settings/config.yaml` file.
@@ -85,5 +86,17 @@ impl Neo4jSettings {
             .build()?;
 
         Graph::connect(config).await
+    }
+}
+
+#[derive(Deserialize)]
+pub struct RedisSettings {
+    pub uri: String,
+}
+
+impl RedisSettings {
+    /// Get a the URI to the Redis database.
+    pub fn get_uri(&self) -> String {
+        self.uri.clone()
     }
 }

@@ -35,7 +35,8 @@ async fn build_app(config: Settings) -> Router {
 
     let shared_state = Arc::new(State { graph, s3_client });
 
-    let store = RedisSessionStore::new("redis://127.0.0.1/").expect("Failed to connect to Redis.");
+    let store =
+        RedisSessionStore::new(config.redis.get_uri()).expect("Failed to connect to Redis.");
 
     // Build our application with some routes
     Router::new()
