@@ -11,7 +11,9 @@ describe("candidacy", () => {
 
   it("create a candidacy", () => {
     cy.wait(5000);
-    cy.get(":nth-child(1) > .bg-white > .flex-col > .space-y-1 > .w-full").click();
+    cy.contains("Architecte Data").parent().parent().within(() => {
+      cy.get(".flex-col > .space-y-1 > .w-full").click();
+    });
     cy.wait(5000);
     cy.get(".w-full").click();
     cy.wait(2000);
